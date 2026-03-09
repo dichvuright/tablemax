@@ -78,32 +78,30 @@ export function ConnectionList() {
 
         return (
           <ContextMenu key={conn.id}>
-            <ContextMenuTrigger asChild>
-              <button
-                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-left transition-colors group ${
-                  isActive
-                    ? 'bg-accent text-accent-foreground'
-                    : 'hover:bg-accent/50 text-foreground/80'
-                }`}
-                onClick={() => handleConnect(conn.id)}
-              >
-                <div
-                  className="w-2 h-2 rounded-full shrink-0 ring-1 ring-white/10"
-                  style={{ backgroundColor: conn.color }}
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="text-xs font-medium truncate">
-                    {conn.name}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground truncate">
-                    {DB_LABELS[conn.type]}
-                    {conn.type !== 'sqlite' && ` · ${conn.host}:${conn.port}`}
-                  </div>
+            <ContextMenuTrigger
+              className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-left transition-colors group cursor-default ${
+                isActive
+                  ? 'bg-accent text-accent-foreground'
+                  : 'hover:bg-accent/50 text-foreground/80'
+              }`}
+              onClick={() => handleConnect(conn.id)}
+            >
+              <div
+                className="w-2 h-2 rounded-full shrink-0 ring-1 ring-white/10"
+                style={{ backgroundColor: conn.color }}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-medium truncate">
+                  {conn.name}
                 </div>
-                {isActive && (
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                )}
-              </button>
+                <div className="text-[10px] text-muted-foreground truncate">
+                  {DB_LABELS[conn.type]}
+                  {conn.type !== 'sqlite' && ` · ${conn.host}:${conn.port}`}
+                </div>
+              </div>
+              {isActive && (
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+              )}
             </ContextMenuTrigger>
             <ContextMenuContent>
               {isActive ? (
