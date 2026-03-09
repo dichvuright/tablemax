@@ -33,7 +33,6 @@ pub struct ConnectionTestResult {
 }
 
 impl DatabaseConnection {
-    /// Build a connection string based on database type
     #[allow(dead_code)]
     pub fn connection_string(&self) -> String {
         if self.connection_method == "uri" {
@@ -86,7 +85,6 @@ pub async fn test_connection(connection: DatabaseConnection) -> Result<Connectio
 
     match connection.db_type.as_str() {
         "sqlite" => {
-            // SQLite: just validate path is non-empty
             if connection.database.trim().is_empty() {
                 return Ok(ConnectionTestResult {
                     success: false,
@@ -102,15 +100,11 @@ pub async fn test_connection(connection: DatabaseConnection) -> Result<Connectio
             })
         }
         "mysql" | "postgres" | "redis" => {
-            // Determine actual host:port — from URI or from form fields
             let addr = if connection.connection_method == "uri" {
                 if let Some(ref uri) = connection.uri {
-                    // Parse host:port from URI like "postgres://user:pass@host:port/db"
                     let uri_str = uri.trim();
-                    // Find the authority part (after :// and before next /)
                     if let Some(after_scheme) = uri_str.split("://").nth(1) {
                         let authority = after_scheme.split('/').next().unwrap_or(after_scheme);
-                        // authority = "user:pass@host:port" or "host:port"
                         let host_port = if authority.contains('@') {
                             authority.split('@').last().unwrap_or(authority)
                         } else {
@@ -118,7 +112,6 @@ pub async fn test_connection(connection: DatabaseConnection) -> Result<Connectio
                         };
                         host_port.to_string()
                     } else {
-                        // No scheme — try the raw string as host:port
                         uri_str.to_string()
                     }
                 } else {
@@ -158,7 +151,6 @@ pub async fn test_connection(connection: DatabaseConnection) -> Result<Connectio
                 }),
             }
         }
-        // MongoDB uses its own dedicated command (mongo_test_connection)
         "mongodb" => Ok(ConnectionTestResult {
             success: false,
             message: "Use MongoDB-specific test handler".to_string(),

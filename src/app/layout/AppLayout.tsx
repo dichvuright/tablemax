@@ -43,9 +43,7 @@ export function AppLayout() {
     <TooltipProvider delay={300}>
       <div className="flex h-screen w-screen overflow-hidden bg-background">
         <Sidebar />
-
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Top Bar */}
           <div className="h-10 border-b border-border/50 flex items-center px-4 gap-2.5 shrink-0 bg-card/20" data-tauri-drag-region>
             {activeConnection ? (
               <>
@@ -79,8 +77,6 @@ export function AppLayout() {
               </>
             )}
           </div>
-
-          {/* Content */}
           {activeConnectionId ? (
             <div className="flex-1 flex flex-col overflow-hidden">
               <QueryTabs />
@@ -121,8 +117,6 @@ export function AppLayout() {
               </div>
             </div>
           )}
-
-          {/* Status Bar */}
           <div className="h-5 px-3 flex items-center gap-3 border-t border-border/30 bg-muted/5 shrink-0">
             {activeConnection && (
               <>

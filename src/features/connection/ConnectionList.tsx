@@ -87,7 +87,6 @@ export function ConnectionList() {
               }`}
               onClick={() => handleConnect(conn.id)}
             >
-              {/* DB Icon */}
               <div
                 className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
                 style={{ backgroundColor: `${conn.color}15`, border: `1px solid ${conn.color}25` }}

@@ -24,7 +24,6 @@ import {
   Copy,
   ChevronRight,
   ChevronDown,
-
   FileJson,
   Loader2,
   Plus,
@@ -40,8 +39,6 @@ import {
   Check,
   CopyPlus,
 } from 'lucide-react';
-
-// ─── Types ───────────────────────────────────────────────────────
 type ViewMode = 'list' | 'json' | 'table';
 
 interface MongoDocumentViewProps {
@@ -49,8 +46,6 @@ interface MongoDocumentViewProps {
   error: string | null;
   isLoading: boolean;
 }
-
-// ─── BSON Value Renderer ─────────────────────────────────────────
 function ValueRenderer({ value, depth = 0 }: { value: unknown; depth?: number }) {
   if (value === null || value === undefined) {
     return <span className="text-rose-400/60 italic">null</span>;
@@ -148,8 +143,6 @@ function CollapsibleObject({ obj, depth }: { obj: Record<string, unknown>; depth
     </div>
   );
 }
-
-// ─── Document Card (List View) ──────────────────────────────────
 function DocumentCard({
   doc,
   index,
@@ -167,10 +160,8 @@ function DocumentCard({
     await navigator.clipboard.writeText(JSON.stringify(doc, null, 2));
     toast.success('Document copied');
   };
-
   return (
     <div className="group relative border border-border/40 rounded">
-      {/* Header */}
       <div className="px-3 py-1.5 border-b border-border/30 flex items-center gap-2">
         <FileJson className="h-3 w-3 text-emerald-500/50" />
         <span className="text-[10px] text-muted-foreground/40 tabular-nums font-mono">#{index + 1}</span>
@@ -182,7 +173,6 @@ function DocumentCard({
           </span>
         )}
         <div className="flex-1" />
-        {/* Actions */}
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <Tooltip>
             <TooltipTrigger className="h-5 w-5 p-0 inline-flex items-center justify-center rounded hover:bg-muted/40 text-muted-foreground/50 hover:text-foreground" onClick={() => onEdit(doc)}>
@@ -210,7 +200,6 @@ function DocumentCard({
           </Tooltip>
         </div>
       </div>
-      {/* Body */}
       <div className="px-3 py-2 space-y-px text-[11px] font-mono leading-relaxed">
         {Object.entries(doc).map(([key, value]) => (
           <div key={key} className="flex gap-1.5 items-start">
@@ -223,8 +212,6 @@ function DocumentCard({
     </div>
   );
 }
-
-// ─── JSON View ──────────────────────────────────────────────────
 function JsonView({ docs }: { docs: Record<string, unknown>[] }) {
   const json = useMemo(() => JSON.stringify(docs, null, 2), [docs]);
   const handleCopy = async () => {
@@ -246,13 +233,10 @@ function JsonView({ docs }: { docs: Record<string, unknown>[] }) {
     </div>
   );
 }
-
-// ─── Table View ──────────────────────────────────────────────────
 function TableView({ docs }: { docs: Record<string, unknown>[] }) {
   const columns = useMemo(() => {
     const colSet = new Set<string>();
     docs.forEach(doc => Object.keys(doc).forEach(k => colSet.add(k)));
-    // Put _id first
     const cols = Array.from(colSet);
     const idIndex = cols.indexOf('_id');
     if (idIndex > 0) {
@@ -314,8 +298,6 @@ function TableView({ docs }: { docs: Record<string, unknown>[] }) {
     </div>
   );
 }
-
-// ─── Insert / Edit Dialog ───────────────────────────────────────
 function DocumentDialog({
   open,
   onClose,
@@ -336,7 +318,7 @@ function DocumentDialog({
   const handleSubmit = async () => {
     setError(null);
     try {
-      JSON.parse(json); // validate
+      JSON.parse(json);
     } catch {
       setError('Invalid JSON');
       return;
@@ -351,7 +333,6 @@ function DocumentDialog({
       setIsSubmitting(false);
     }
   };
-
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="max-w-2xl rounded-md">
@@ -388,8 +369,6 @@ function DocumentDialog({
     </Dialog>
   );
 }
-
-// ─── Main Component ─────────────────────────────────────────────
 export function MongoDocumentView({ result, error, isLoading }: MongoDocumentViewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [insertOpen, setInsertOpen] = useState(false);
@@ -431,8 +410,6 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
   const handleEditSubmit = useCallback(async (json: string) => {
     const coll = getCollectionFromQuery();
     if (!coll || !activeConnection || !editDoc) throw new Error('No document to update');
-
-    // Build filter from _id
     const id = editDoc._id;
     const filterObj = id ? { _id: id } : {};
     const filter = JSON.stringify(filterObj);
@@ -466,8 +443,6 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
   const handleClone = useCallback(async (doc: Record<string, unknown>) => {
     const coll = getCollectionFromQuery();
     if (!coll || !activeConnection) return;
-
-    // Remove _id for insert
     const { _id, ...rest } = doc;
     void _id;
     try {
@@ -498,7 +473,6 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
       toast.error('No collection selected');
       return;
     }
-
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
@@ -530,8 +504,6 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
     await navigator.clipboard.writeText(JSON.stringify(result.rows, null, 2));
     toast.success(`Copied ${result.rows.length} documents`);
   }, [result]);
-
-  // Loading state
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -542,8 +514,6 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
       </div>
     );
   }
-
-  // Error state
   if (error) {
     return (
       <div className="flex-1 flex items-center justify-center p-4">
@@ -555,8 +525,6 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
       </div>
     );
   }
-
-  // Empty / no-query state
   if (!result) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -569,12 +537,9 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
       </div>
     );
   }
-
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* ─── Toolbar ─── */}
       <div className="h-9 px-3 flex items-center gap-1.5 border-b border-border/40 shrink-0">
-        {/* View mode toggle */}
         <div className="flex items-center bg-muted/30 rounded-md p-0.5 gap-px">
           {[
             { mode: 'list' as ViewMode, icon: List, label: 'List' },
@@ -596,19 +561,13 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
             </Tooltip>
           ))}
         </div>
-
         <div className="w-px h-4 bg-border/30" />
-
-        {/* Doc count */}
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Rows3 className="h-3 w-3" />
           <span className="tabular-nums">{docs.length}</span>
           <span className="text-muted-foreground/50">docs</span>
         </div>
-
         <div className="flex-1" />
-
-        {/* Action buttons */}
         <Tooltip>
           <TooltipTrigger
             className="h-6 px-1.5 inline-flex items-center gap-1 rounded text-[10px] text-emerald-400 hover:bg-emerald-500/10"
@@ -618,7 +577,6 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs">Insert Document</TooltipContent>
         </Tooltip>
-
         <Tooltip>
           <TooltipTrigger
             className="h-6 px-1.5 inline-flex items-center gap-1 rounded text-[10px] text-muted-foreground/60 hover:text-foreground hover:bg-muted/30"
@@ -660,15 +618,11 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs">Copy all</TooltipContent>
         </Tooltip>
-
-        {/* Execution time */}
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground/40 ml-1">
           <Timer className="h-3 w-3" />
           {result.execution_time_ms}ms
         </div>
       </div>
-
-      {/* ─── Content ─── */}
       {docs.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
           <p className="text-sm text-muted-foreground/40">No documents found</p>
@@ -684,15 +638,12 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
       ) : (
         <TableView docs={docs} />
       )}
-
-      {/* ─── Dialogs ─── */}
       <DocumentDialog
         open={insertOpen}
         onClose={() => setInsertOpen(false)}
         onSubmit={handleInsert}
         title="Insert Document"
       />
-
       {editDoc && (
         <DocumentDialog
           open={true}
