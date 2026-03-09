@@ -39,6 +39,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
+import { DatabaseIcon } from '@/components/icons/database-icons';
 
 const DEFAULT_COLORS = [
   '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e',
@@ -264,6 +265,7 @@ export function ConnectionForm() {
                 <SelectContent>
                   {DB_TYPES.map(t => (
                     <SelectItem key={t} value={t}>
+                      <DatabaseIcon type={t} className="size-4 shrink-0" />
                       {DB_LABELS[t]}
                     </SelectItem>
                   ))}
