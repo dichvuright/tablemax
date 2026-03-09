@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useConnectionStore } from './connectionStore';
 import { generateId } from '@/services/tauri-api';
 import {
@@ -129,7 +128,8 @@ export function ConnectionForm() {
     setShowPassword(false);
   }, [editingConnection, isFormOpen]);
 
-  const handleDbTypeChange = useCallback((value: string) => {
+  const handleDbTypeChange = useCallback((value: string | null) => {
+    if (!value) return;
     const dbType = value as DatabaseType;
     setForm(prev => ({
       ...prev,
@@ -140,7 +140,8 @@ export function ConnectionForm() {
     clearTestResult();
   }, [clearTestResult]);
 
-  const handleConnectionMethodChange = useCallback((value: string) => {
+  const handleConnectionMethodChange = useCallback((value: string | null) => {
+    if (!value) return;
     setForm(prev => ({ ...prev, connectionMethod: value as ConnectionMethod }));
     clearTestResult();
   }, [clearTestResult]);
