@@ -13,9 +13,6 @@
 #define ENGINE_VERSION "0.1.0"
 
 namespace tablemax {
-
-/* ─── Internal types ─────────────────────────────────────── */
-
 struct PluginEntry {
     std::string path;
     std::string db_type;
@@ -37,31 +34,21 @@ struct Engine {
     std::mutex mutex;
     int next_conn_id = 1;
 };
-
-/* ─── Result wrapper ─────────────────────────────────────── */
-
 struct ResultWrapper {
     std::unique_ptr<IResultStream> stream;
     std::vector<ColumnInfo> columns_cache;
     bool columns_cached = false;
 };
-
-/* ─── Helper: duplicate string for FFI ───────────────────── */
-
 static char* dup_string(const std::string& str) {
     char* copy = new char[str.size() + 1];
     std::memcpy(copy, str.c_str(), str.size() + 1);
     return copy;
 }
-
-/* ─── Row to JSON conversion ─────────────────────────────── */
-
 static std::string row_to_json(const Row& row) {
     std::ostringstream ss;
     ss << "{";
     for (size_t i = 0; i < row.size(); ++i) {
         if (i > 0) ss << ",";
-        // Escape key and value
         ss << "\"" << row[i].first << "\":\"" << row[i].second << "\"";
     }
     ss << "}";
@@ -90,14 +77,8 @@ static std::string strings_to_json(const std::vector<std::string>& strs) {
     return ss.str();
 }
 
-} // namespace tablemax
-
+} 
 using namespace tablemax;
-
-/* ═══════════════════════════════════════════════════════════
-   C API Implementation
-   ═══════════════════════════════════════════════════════════ */
-
 extern "C" {
 
 EngineHandle engine_init(void) {
@@ -108,21 +89,16 @@ EngineHandle engine_init(void) {
 void engine_shutdown(EngineHandle handle) {
     auto* engine = static_cast<Engine*>(handle);
     if (!engine) return;
-
-    // Disconnect all connections
     for (auto& [_, conn] : engine->connections) {
         if (conn.plugin && conn.owned) {
             conn.plugin->disconnect();
         }
     }
     engine->connections.clear();
-
-    // Unload plugins (TODO: dlclose/FreeLibrary)
     engine->plugins.clear();
 
     delete engine;
 }
-
 const char* engine_get_version(void) {
     return dup_string(ENGINE_VERSION);
 }
@@ -130,15 +106,9 @@ const char* engine_get_version(void) {
 void engine_free_string(const char* str) {
     delete[] str;
 }
-
-/* ─── Plugin management ──────────────────────────────────── */
-
 int engine_load_plugins(EngineHandle handle, const char* plugin_dir) {
     auto* engine = static_cast<Engine*>(handle);
     if (!engine || !plugin_dir) return 0;
-
-    // TODO: Scan directory for .dll/.so files and load them
-    // For now, this is a stub that returns 0
     (void)plugin_dir;
     return 0;
 }
@@ -166,9 +136,6 @@ int engine_has_plugin(EngineHandle handle, const char* db_type) {
     }
     return 0;
 }
-
-/* ─── Connection management ──────────────────────────────── */
-
 ConnectionHandle engine_connect(
     EngineHandle handle,
     const char* db_type,
@@ -176,8 +143,6 @@ ConnectionHandle engine_connect(
 ) {
     auto* engine = static_cast<Engine*>(handle);
     if (!engine || !db_type || !connection_string) return nullptr;
-
-    // Find plugin for this db type
     PluginEntry* found = nullptr;
     for (auto& p : engine->plugins) {
         if (p.db_type == db_type) {
@@ -190,8 +155,6 @@ ConnectionHandle engine_connect(
         engine->last_error = std::string("No plugin found for database type: ") + db_type;
         return nullptr;
     }
-
-    // Create plugin instance and connect
     IDbPlugin* plugin = found->create_fn();
     if (!plugin) {
         engine->last_error = "Failed to create plugin instance";
@@ -232,8 +195,6 @@ EngineStatus engine_test_connection(
 ) {
     auto* engine = static_cast<Engine*>(handle);
     if (!engine || !db_type || !connection_string) return ENGINE_ERROR;
-
-    // Find plugin
     PluginEntry* found = nullptr;
     for (auto& p : engine->plugins) {
         if (p.db_type == db_type) {
@@ -257,9 +218,6 @@ EngineStatus engine_test_connection(
     if (found->destroy_fn) found->destroy_fn(plugin);
     return ok ? ENGINE_OK : ENGINE_ERROR;
 }
-
-/* ─── Query execution ────────────────────────────────────── */
-
 ResultHandle engine_execute(
     EngineHandle handle,
     ConnectionHandle conn,
@@ -291,9 +249,6 @@ const char* engine_get_error(EngineHandle handle) {
     if (!engine) return dup_string("Invalid engine handle");
     return dup_string(engine->last_error);
 }
-
-/* ─── Result streaming ───────────────────────────────────── */
-
 int result_column_count(ResultHandle handle) {
     auto* wrapper = static_cast<ResultWrapper*>(handle);
     if (!wrapper || !wrapper->stream) return 0;
@@ -351,9 +306,6 @@ void result_close(ResultHandle handle) {
     }
     delete wrapper;
 }
-
-/* ─── Schema inspection ──────────────────────────────────── */
-
 const char* engine_list_tables(EngineHandle handle, ConnectionHandle conn) {
     auto* engine = static_cast<Engine*>(handle);
     if (!engine) return dup_string("[]");
@@ -383,8 +335,6 @@ const char* engine_get_table_schema(
     }
 
     auto columns = it->second.plugin->get_table_schema(table_name);
-
-    // Convert to JSON
     std::ostringstream ss;
     ss << "[";
     for (size_t i = 0; i < columns.size(); ++i) {
@@ -399,4 +349,4 @@ const char* engine_get_table_schema(
     return dup_string(ss.str());
 }
 
-} // extern "C"
+} 

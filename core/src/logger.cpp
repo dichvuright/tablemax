@@ -47,4 +47,4 @@ void log(LogLevel level, const std::string& component, const std::string& messag
               << message << std::endl;
 }
 
-} // namespace tablemax
+}

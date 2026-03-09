@@ -18,11 +18,6 @@ struct LoadedPlugin {
     std::string path;
     std::string db_type;
 };
-
-/**
- * Load a plugin from a shared library path.
- * The library must export: create_plugin() and destroy_plugin()
- */
 static LoadedPlugin load_plugin_from_path(const std::string& path) {
     LoadedPlugin result;
     result.path = path;
@@ -50,10 +45,7 @@ static LoadedPlugin load_plugin_from_path(const std::string& path) {
         dlsym(lib, "destroy_plugin")
     );
 #endif
-
-    // Verify we got both functions
     if (!result.create_fn || !result.destroy_fn) {
-        // Unload if invalid
 #ifdef _WIN32
         FreeLibrary(static_cast<HMODULE>(result.handle));
 #else
@@ -64,8 +56,6 @@ static LoadedPlugin load_plugin_from_path(const std::string& path) {
         result.destroy_fn = nullptr;
         return result;
     }
-
-    // Get plugin type by creating a temporary instance
     IDbPlugin* temp = result.create_fn();
     if (temp) {
         result.db_type = temp->db_type();
@@ -74,10 +64,6 @@ static LoadedPlugin load_plugin_from_path(const std::string& path) {
 
     return result;
 }
-
-/**
- * Scan a directory for plugin shared libraries.
- */
 std::vector<LoadedPlugin> scan_plugin_directory(const std::string& dir) {
     std::vector<LoadedPlugin> plugins;
 
@@ -116,4 +102,4 @@ std::vector<LoadedPlugin> scan_plugin_directory(const std::string& dir) {
     return plugins;
 }
 
-} // namespace tablemax
+} 
