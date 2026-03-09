@@ -34,6 +34,7 @@ pub struct ConnectionTestResult {
 
 impl DatabaseConnection {
     /// Build a connection string based on database type
+    #[allow(dead_code)]
     pub fn connection_string(&self) -> String {
         if self.connection_method == "uri" {
             return self.uri.clone().unwrap_or_default();
