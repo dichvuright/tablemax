@@ -1,0 +1,12 @@
+{
+	"InstallScripts" : 
+	[
+		"V:/Tauri/tablemax/core/build/cmake_install.cmake",
+		"V:/Tauri/tablemax/core/build/plugins/mysql/cmake_install.cmake",
+		"V:/Tauri/tablemax/core/build/plugins/postgres/cmake_install.cmake",
+		"V:/Tauri/tablemax/core/build/plugins/sqlite/cmake_install.cmake",
+		"V:/Tauri/tablemax/core/build/plugins/mongodb/cmake_install.cmake",
+		"V:/Tauri/tablemax/core/build/plugins/redis/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

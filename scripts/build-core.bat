@@ -2,30 +2,24 @@
 REM Build script for TableMax C++ engine (Windows/MSVC)
 setlocal
 
-REM ─── Find vcvarsall.bat ──────────────────────────────
-set "VCVARS="
-if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" (
-    set "VCVARS=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat"
-)
-if exist "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" (
-    set "VCVARS=C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
-)
-if exist "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" (
-    set "VCVARS=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"
-)
-if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvarsall.bat" (
-    set "VCVARS=C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvarsall.bat"
-)
+set "VCVARS=C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat"
 
-if "%VCVARS%"=="" (
+if not exist "%VCVARS%" (
+    REM Fallback: try standard 2022 paths
+    for %%e in (Community BuildTools Enterprise Professional) do (
+        if exist "C:\Program Files\Microsoft Visual Studio\2022\%%e\VC\Auxiliary\Build\vcvarsall.bat" (
+            set "VCVARS=C:\Program Files\Microsoft Visual Studio\2022\%%e\VC\Auxiliary\Build\vcvarsall.bat"
+            goto :found
+        )
+    )
     echo ERROR: Could not find vcvarsall.bat
     exit /b 1
 )
 
+:found
 echo Found MSVC: %VCVARS%
 call "%VCVARS%" x64
 
-REM ─── Build core engine ─────────────────────────────
 echo.
 echo Building TableMax Core Engine...
 cd /d "%~dp0..\core"
@@ -46,4 +40,4 @@ if errorlevel 1 (
 )
 
 echo.
-echo === TableMax Core Engine built ===
+echo === TableMax Core Engine built successfully ===

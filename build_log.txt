@@ -1,0 +1,56 @@
+Found MSVC: C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat
+**********************************************************************
+** Visual Studio 2026 Developer Command Prompt v18.1.0
+** Copyright (c) 2025 Microsoft Corporation
+**********************************************************************
+[DEBUG:ext\vcvars.bat] Found potential v145 version file: 'Microsoft.VCToolsVersion.VC.14.50.18.0.txt'
+[DEBUG:ext\vcvars.bat] Testing v145 version file: 'Microsoft.VCToolsVersion.VC.14.50.18.0.txt'
+[vcvarsall.bat] Environment initialized for: 'x64'
+
+Building TableMax Core Engine...
+-- The CXX compiler identification is MSVC 19.50.35720.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (0.7s)
+-- Generating done (0.1s)
+-- Build files have been written to: V:/Tauri/tablemax/core/build
+[  5%] Building CXX object CMakeFiles/tablemax_engine.dir/src/query_engine.cpp.obj
+query_engine.cpp
+V:\Tauri\tablemax\core\src\query_engine.cpp(208): warning C4312: 'reinterpret_cast': conversion from 'int' to 'ConnectionHandle' of greater size
+[ 11%] Building CXX object CMakeFiles/tablemax_engine.dir/src/connection_manager.cpp.obj
+connection_manager.cpp
+[ 17%] Building CXX object CMakeFiles/tablemax_engine.dir/src/schema_loader.cpp.obj
+schema_loader.cpp
+[ 23%] Building CXX object CMakeFiles/tablemax_engine.dir/src/result_stream.cpp.obj
+result_stream.cpp
+[ 29%] Building CXX object CMakeFiles/tablemax_engine.dir/src/plugin_loader.cpp.obj
+plugin_loader.cpp
+[ 35%] Building CXX object CMakeFiles/tablemax_engine.dir/src/logger.cpp.obj
+logger.cpp
+[ 41%] Linking CXX shared library bin\tablemax_engine.dll
+[ 41%] Built target tablemax_engine
+[ 47%] Building CXX object plugins/mysql/CMakeFiles/mysql_plugin.dir/mysql_plugin.cpp.obj
+mysql_plugin.cpp
+[ 52%] Linking CXX shared library ..\mysql_plugin.dll
+[ 52%] Built target mysql_plugin
+[ 58%] Building CXX object plugins/postgres/CMakeFiles/postgres_plugin.dir/postgres_plugin.cpp.obj
+postgres_plugin.cpp
+[ 64%] Linking CXX shared library ..\postgres_plugin.dll
+[ 64%] Built target postgres_plugin
+[ 70%] Building CXX object plugins/sqlite/CMakeFiles/sqlite_plugin.dir/sqlite_plugin.cpp.obj
+sqlite_plugin.cpp
+[ 76%] Linking CXX shared library ..\sqlite_plugin.dll
+[ 76%] Built target sqlite_plugin
+[ 82%] Building CXX object plugins/mongodb/CMakeFiles/mongodb_plugin.dir/mongo_plugin.cpp.obj
+mongo_plugin.cpp
+[ 88%] Linking CXX shared library ..\mongodb_plugin.dll
+[ 88%] Built target mongodb_plugin
+[ 94%] Building CXX object plugins/redis/CMakeFiles/redis_plugin.dir/redis_plugin.cpp.obj
+redis_plugin.cpp
+[100%] Linking CXX shared library ..\redis_plugin.dll
+[100%] Built target redis_plugin
+
+=== TableMax Core Engine built successfully ===

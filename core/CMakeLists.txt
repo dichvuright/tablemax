@@ -19,6 +19,8 @@ target_include_directories(tablemax_engine PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+target_compile_definitions(tablemax_engine PRIVATE TABLEMAX_ENGINE_EXPORTS)
+
 # Windows-specific: export all symbols
 if(WIN32)
     set_target_properties(tablemax_engine PROPERTIES
@@ -41,22 +43,27 @@ set(PLUGIN_DIR "${CMAKE_SOURCE_DIR}/../plugins")
 
 if(EXISTS "${PLUGIN_DIR}/mysql")
     add_subdirectory(${PLUGIN_DIR}/mysql ${CMAKE_BINARY_DIR}/plugins/mysql)
+    target_include_directories(mysql_plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 endif()
 
 if(EXISTS "${PLUGIN_DIR}/postgres")
     add_subdirectory(${PLUGIN_DIR}/postgres ${CMAKE_BINARY_DIR}/plugins/postgres)
+    target_include_directories(postgres_plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 endif()
 
 if(EXISTS "${PLUGIN_DIR}/sqlite")
     add_subdirectory(${PLUGIN_DIR}/sqlite ${CMAKE_BINARY_DIR}/plugins/sqlite)
+    target_include_directories(sqlite_plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 endif()
 
 if(EXISTS "${PLUGIN_DIR}/mongodb")
     add_subdirectory(${PLUGIN_DIR}/mongodb ${CMAKE_BINARY_DIR}/plugins/mongodb)
+    target_include_directories(mongodb_plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 endif()
 
 if(EXISTS "${PLUGIN_DIR}/redis")
     add_subdirectory(${PLUGIN_DIR}/redis ${CMAKE_BINARY_DIR}/plugins/redis)
+    target_include_directories(redis_plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 endif()
 
 # Install rules
