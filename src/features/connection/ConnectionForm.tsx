@@ -223,13 +223,9 @@ export function ConnectionForm() {
 
   return (
     <Dialog open={isFormOpen} onOpenChange={(open) => !open && closeForm()}>
-      <DialogContent className="sm:max-w-[520px] p-0 gap-0 overflow-hidden border-border/50">
+      <DialogContent className="sm:max-w-[600px] p-0 gap-0 overflow-hidden border-border/50">
         {/* Header */}
         <div className="px-5 pt-5 pb-4">
-          <div
-            className="absolute inset-x-0 top-0 h-0.5"
-            style={{ background: `linear-gradient(90deg, ${form.color || '#6366f1'}, ${form.color || '#6366f1'}44)` }}
-          />
           <DialogHeader>
             <DialogTitle className="text-base font-semibold">
               {editingConnection ? 'Edit Connection' : 'New Connection'}

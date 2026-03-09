@@ -9,6 +9,9 @@ edition = "2021"
 name = "tablemax_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
+[features]
+cpp-engine = []
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 

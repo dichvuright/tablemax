@@ -1,4 +1,4 @@
-#![allow(non_camel_case_types, dead_code)]
+#![allow(non_camel_case_types, dead_code, unused_imports)]
 
 /**
  * Rust FFI bindings to the TableMax C++ engine.
@@ -137,7 +137,6 @@ impl Drop for Engine {
 // ─── Tauri commands (engine-backed) ─────────────────────────
 
 /// Get the C++ engine version.
-/// This command is always available (even without CPP feature) for testing.
 #[tauri::command]
 pub fn engine_version() -> String {
     #[cfg(feature = "cpp-engine")]
