@@ -59,7 +59,11 @@ export function AppLayout() {
                   {activeConnection.name}
                 </span>
                 <span className="text-[10px] text-muted-foreground/50 font-mono">
-                  {activeConnection.database || activeConnection.host}
+                  {activeConnection.database || (
+                    activeConnection.connectionMethod === 'uri' && activeConnection.uri
+                      ? (() => { try { const u = new URL(activeConnection.uri); return u.host || activeConnection.uri; } catch { return activeConnection.uri; } })()
+                      : activeConnection.host
+                  )}
                 </span>
                 <div className="flex-1" />
                 <span className="text-[10px] text-muted-foreground/30 font-mono uppercase">

@@ -101,7 +101,11 @@ export function ConnectionList() {
                 </div>
                 <div className="text-[10px] text-muted-foreground/60 truncate leading-tight">
                   {DB_LABELS[conn.type]}
-                  {conn.type !== 'sqlite' && ` · ${conn.host}:${conn.port}`}
+                  {conn.type !== 'sqlite' && ` · ${
+                    conn.connectionMethod === 'uri' && conn.uri
+                      ? (() => { try { const u = new URL(conn.uri); return u.host || conn.uri; } catch { return conn.uri; } })()
+                      : `${conn.host}:${conn.port}`
+                  }`}
                 </div>
               </div>
 

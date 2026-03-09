@@ -67,7 +67,34 @@ export async function buildConnectionString(connection: DatabaseConnection): Pro
 /** Get effective connection string — handles both form and URI modes */
 function getEffectiveConnectionString(connection: DatabaseConnection): string {
   if (connection.connectionMethod === 'uri' && connection.uri) {
-    return connection.uri;
+    let uri = connection.uri.trim();
+
+    // Auto-fix: if URI doesn't have ://, add the correct protocol prefix
+    if (!uri.includes('://')) {
+      switch (connection.type) {
+        case 'postgres':
+          uri = `postgresql://${uri}`;
+          break;
+        case 'mysql':
+          uri = `mysql://${uri}`;
+          break;
+        case 'mongodb':
+          uri = `mongodb://${uri}`;
+          break;
+        case 'redis':
+          uri = `redis://${uri}`;
+          break;
+        default:
+          break;
+      }
+    }
+
+    // Auto-fix: postgres:// → postgresql:// (tauri-plugin-sql expects postgresql://)
+    if (connection.type === 'postgres' && uri.startsWith('postgres://') && !uri.startsWith('postgresql://')) {
+      uri = 'postgresql' + uri.slice('postgres'.length);
+    }
+
+    return uri;
   }
 
   const { type, host, port, username, password, database, authSource } = connection;
@@ -108,7 +135,8 @@ export async function getDbConnection(connection: DatabaseConnection): Promise<D
   const existing = dbPool.get(connection.id);
   if (existing) return existing;
 
-  const connString = await buildConnectionString(connection);
+  // Use getEffectiveConnectionString which handles both URI and form modes
+  const connString = getEffectiveConnectionString(connection);
   const db = await Database.load(connString);
   dbPool.set(connection.id, db);
   return db;
