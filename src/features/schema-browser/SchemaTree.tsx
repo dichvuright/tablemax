@@ -31,6 +31,7 @@ export function SchemaTree() {
   const [tables, setTables] = useState<TableInfo[]>([]);
   const [mongoDbs, setMongoDbs] = useState<MongoDatabase[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
 
   const activeConnection = connections.find(c => c.id === activeConnectionId);
   const isMongo = activeConnection?.type === 'mongodb';
@@ -243,12 +244,18 @@ export function SchemaTree() {
                 {db.collections.map(coll => (
                   <button
                     key={coll}
-                    className="w-full flex items-center gap-1.5 px-2 py-0.5 rounded-md hover:bg-muted/30 text-left transition-colors"
-                    onDoubleClick={() => handleMongoCollectionClick(db.name, coll)}
-                    title={`Double-click to query: db.${coll}.find({})`}
+                    className={`w-full flex items-center gap-1.5 px-2 py-0.5 rounded-md text-left transition-colors ${
+                      selectedCollection === coll
+                        ? 'bg-primary/15 text-primary'
+                        : 'hover:bg-muted/30'
+                    }`}
+                    onClick={() => handleMongoCollectionClick(db.name, coll)}
+                    title={`Click to view: db.${coll}.find({})`}
                   >
-                    <Table2 className="h-3 w-3 text-muted-foreground/40 shrink-0" />
-                    <span className="text-[11px] truncate text-foreground/70">{coll}</span>
+                    <Table2 className={`h-3 w-3 shrink-0 ${
+                      selectedCollection === coll ? 'text-primary/60' : 'text-muted-foreground/40'
+                    }`} />
+                    <span className="text-[11px] truncate">{coll}</span>
                   </button>
                 ))}
               </div>

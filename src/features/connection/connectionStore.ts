@@ -146,15 +146,31 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
     const connection = get().connections.find(c => c.id === connectionId);
     if (!connection) return;
 
+    // Also update tabStore so the UI can read from active tab
+    const tabStore = await import('@/features/query-editor/tabStore');
+    const { activeTabId, updateTabExecuting, updateTabError, updateTabResult } = tabStore.useTabStore.getState();
+
     set({ isExecuting: true, queryError: null, queryResult: null });
+    if (activeTabId) {
+      updateTabExecuting(activeTabId, true);
+      updateTabError(activeTabId, null);
+      updateTabResult(activeTabId, null);
+    }
+
     try {
       const result = await api.executeQuery(connection, query);
       set({ queryResult: result, isExecuting: false });
+      if (activeTabId) {
+        updateTabResult(activeTabId, result);
+        updateTabExecuting(activeTabId, false);
+      }
     } catch (err) {
-      set({
-        queryError: err instanceof Error ? err.message : String(err),
-        isExecuting: false,
-      });
+      const errMsg = err instanceof Error ? err.message : String(err);
+      set({ queryError: errMsg, isExecuting: false });
+      if (activeTabId) {
+        updateTabError(activeTabId, errMsg);
+        updateTabExecuting(activeTabId, false);
+      }
     }
   },
 
