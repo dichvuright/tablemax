@@ -110,6 +110,11 @@ export function SchemaTree() {
       return;
     }
 
+    // Update the connection's database field so queries use the correct namespace
+    const { updateConnection } = useConnectionStore.getState();
+    const updatedConn = { ...activeConnection, database: db.name };
+    await updateConnection(updatedConn);
+
     // If collections not loaded yet, load them
     if (db.collections.length === 0) {
       setMongoDbs(prev => prev.map((d, i) =>
@@ -117,9 +122,7 @@ export function SchemaTree() {
       ));
 
       try {
-        // Create a temporary connection-like object with the specific database
-        const tempConn = { ...activeConnection, database: db.name };
-        const collections = await api.mongoListCollections(tempConn);
+        const collections = await api.mongoListCollections(updatedConn);
         setMongoDbs(prev => prev.map((d, i) =>
           i === index ? { ...d, collections, isLoading: false } : d
         ));
@@ -148,7 +151,12 @@ export function SchemaTree() {
     updateTabQuery(activeTabId, query);
   };
 
-  const handleMongoCollectionClick = (collName: string) => {
+  const handleMongoCollectionClick = async (dbName: string, collName: string) => {
+    // Make sure the connection's database matches the collection's parent database
+    if (activeConnection && activeConnection.database !== dbName) {
+      const { updateConnection } = useConnectionStore.getState();
+      await updateConnection({ ...activeConnection, database: dbName });
+    }
     const { activeTabId, updateTabQuery } = useTabStore.getState();
     if (!activeTabId) return;
     updateTabQuery(activeTabId, `db.${collName}.find({})`);
@@ -223,7 +231,7 @@ export function SchemaTree() {
                   <button
                     key={coll}
                     className="w-full flex items-center gap-1.5 px-2 py-0.5 rounded-md hover:bg-muted/30 text-left transition-colors"
-                    onDoubleClick={() => handleMongoCollectionClick(coll)}
+                    onDoubleClick={() => handleMongoCollectionClick(db.name, coll)}
                     title={`Double-click to query: db.${coll}.find({})`}
                   >
                     <Table2 className="h-3 w-3 text-muted-foreground/40 shrink-0" />
