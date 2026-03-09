@@ -102,8 +102,31 @@ pub async fn test_connection(connection: DatabaseConnection) -> Result<Connectio
             })
         }
         "mysql" | "postgres" | "redis" => {
-            // Actually test TCP connectivity to host:port
-            let addr = format!("{}:{}", connection.host, connection.port);
+            // Determine actual host:port — from URI or from form fields
+            let addr = if connection.connection_method == "uri" {
+                if let Some(ref uri) = connection.uri {
+                    // Parse host:port from URI like "postgres://user:pass@host:port/db"
+                    let uri_str = uri.trim();
+                    // Find the authority part (after :// and before next /)
+                    if let Some(after_scheme) = uri_str.split("://").nth(1) {
+                        let authority = after_scheme.split('/').next().unwrap_or(after_scheme);
+                        // authority = "user:pass@host:port" or "host:port"
+                        let host_port = if authority.contains('@') {
+                            authority.split('@').last().unwrap_or(authority)
+                        } else {
+                            authority
+                        };
+                        host_port.to_string()
+                    } else {
+                        // No scheme — try the raw string as host:port
+                        uri_str.to_string()
+                    }
+                } else {
+                    format!("{}:{}", connection.host, connection.port)
+                }
+            } else {
+                format!("{}:{}", connection.host, connection.port)
+            };
 
             match tokio::time::timeout(
                 std::time::Duration::from_secs(5),

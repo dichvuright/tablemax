@@ -94,6 +94,21 @@ function getEffectiveConnectionString(connection: DatabaseConnection): string {
       uri = 'postgresql' + uri.slice('postgres'.length);
     }
 
+    // Auto-fix: ensure Postgres/MySQL URIs have a database name in the path
+    // e.g. postgresql://user:pass@host:port → postgresql://user:pass@host:port/postgres
+    try {
+      const parsed = new URL(uri);
+      if (!parsed.pathname || parsed.pathname === '/') {
+        if (connection.type === 'postgres') {
+          uri = uri.replace(/\/?$/, '/postgres');
+        } else if (connection.type === 'mysql') {
+          uri = uri.replace(/\/?$/, '/mysql');
+        }
+      }
+    } catch {
+      // URL parsing failed, pass through as-is
+    }
+
     return uri;
   }
 
