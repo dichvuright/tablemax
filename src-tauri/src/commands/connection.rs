@@ -35,7 +35,6 @@ pub struct ConnectionTestResult {
 impl DatabaseConnection {
     /// Build a connection string based on database type
     pub fn connection_string(&self) -> String {
-        // If connection method is URI, return the raw URI
         if self.connection_method == "uri" {
             return self.uri.clone().unwrap_or_default();
         }
@@ -57,7 +56,6 @@ impl DatabaseConnection {
                 } else {
                     String::new()
                 };
-
                 if self.username.is_empty() {
                     format!("mongodb://{}:{}/{}{}", self.host, self.port, self.database, auth_param)
                 } else {
@@ -83,11 +81,18 @@ impl DatabaseConnection {
 
 #[tauri::command]
 pub async fn test_connection(connection: DatabaseConnection) -> Result<ConnectionTestResult, String> {
-    let conn_string = connection.connection_string();
     let start = Instant::now();
 
     match connection.db_type.as_str() {
         "sqlite" => {
+            // SQLite: just validate path is non-empty
+            if connection.database.trim().is_empty() {
+                return Ok(ConnectionTestResult {
+                    success: false,
+                    message: "Database path is required for SQLite".to_string(),
+                    latency_ms: None,
+                });
+            }
             let elapsed = start.elapsed().as_millis() as u64;
             Ok(ConnectionTestResult {
                 success: true,
@@ -95,22 +100,46 @@ pub async fn test_connection(connection: DatabaseConnection) -> Result<Connectio
                 latency_ms: Some(elapsed),
             })
         }
-        "mysql" | "postgres" | "mongodb" | "redis" => {
-            if conn_string.is_empty() {
-                return Ok(ConnectionTestResult {
-                    success: false,
-                    message: "Invalid connection configuration".to_string(),
-                    latency_ms: None,
-                });
-            }
+        "mysql" | "postgres" | "redis" => {
+            // Actually test TCP connectivity to host:port
+            let addr = format!("{}:{}", connection.host, connection.port);
 
-            let elapsed = start.elapsed().as_millis() as u64;
-            Ok(ConnectionTestResult {
-                success: true,
-                message: format!("Connection string validated ({})", connection.db_type),
-                latency_ms: Some(elapsed),
-            })
+            match tokio::time::timeout(
+                std::time::Duration::from_secs(5),
+                tokio::net::TcpStream::connect(&addr),
+            )
+            .await
+            {
+                Ok(Ok(_stream)) => {
+                    let elapsed = start.elapsed().as_millis() as u64;
+                    Ok(ConnectionTestResult {
+                        success: true,
+                        message: format!(
+                            "{} server reachable at {}",
+                            connection.db_type.to_uppercase(),
+                            addr
+                        ),
+                        latency_ms: Some(elapsed),
+                    })
+                }
+                Ok(Err(e)) => Ok(ConnectionTestResult {
+                    success: false,
+                    message: format!("Connection refused: {}", e),
+                    latency_ms: None,
+                }),
+                Err(_) => Ok(ConnectionTestResult {
+                    success: false,
+                    message: format!("Connection timed out after 5s to {}", addr),
+                    latency_ms: None,
+                }),
+            }
         }
+        // MongoDB uses its own dedicated command (mongo_test_connection)
+        "mongodb" => Ok(ConnectionTestResult {
+            success: false,
+            message: "Use MongoDB-specific test handler".to_string(),
+            latency_ms: None,
+        }),
         _ => Ok(ConnectionTestResult {
             success: false,
             message: format!("Unsupported database type: {}", connection.db_type),

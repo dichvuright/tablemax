@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 
-export type CellType = 'null' | 'number' | 'boolean' | 'date' | 'json' | 'text';
+export type CellType = 'null' | 'number' | 'boolean' | 'date' | 'json' | 'objectid' | 'text';
 
 /**
  * Detect the type of a cell value for styling
@@ -9,10 +9,18 @@ export function detectCellType(value: unknown): CellType {
   if (value === null || value === undefined) return 'null';
   if (typeof value === 'number') return 'number';
   if (typeof value === 'boolean') return 'boolean';
-  if (typeof value === 'object') return 'json';
+  if (typeof value === 'object') {
+    // MongoDB ObjectId: { "$oid": "..." }
+    const obj = value as Record<string, unknown>;
+    if ('$oid' in obj && typeof obj['$oid'] === 'string') return 'objectid';
+    // MongoDB date: { "$date": "..." }
+    if ('$date' in obj) return 'date';
+    return 'json';
+  }
   if (typeof value === 'string') {
-    // Check for date-like strings
     if (/^\d{4}-\d{2}-\d{2}/.test(value)) return 'date';
+    // ObjectId hex string (24 hex chars)
+    if (/^[a-f0-9]{24}$/i.test(value)) return 'objectid';
   }
   return 'text';
 }
@@ -28,14 +36,26 @@ export function formatCellValue(value: unknown, type: CellType): string {
       return String(value);
     case 'boolean':
       return value ? 'true' : 'false';
+    case 'objectid': {
+      if (typeof value === 'object' && value !== null && '$oid' in (value as Record<string, unknown>)) {
+        return (value as Record<string, unknown>)['$oid'] as string;
+      }
+      return String(value);
+    }
+    case 'date': {
+      if (typeof value === 'object' && value !== null && '$date' in (value as Record<string, unknown>)) {
+        const dateVal = (value as Record<string, unknown>)['$date'];
+        if (typeof dateVal === 'string') return dateVal;
+        return JSON.stringify(dateVal);
+      }
+      return String(value);
+    }
     case 'json':
       try {
         return JSON.stringify(value, null, 0);
       } catch {
         return String(value);
       }
-    case 'date':
-      return String(value);
     case 'text':
     default:
       return String(value);
@@ -57,12 +77,13 @@ export function CellRenderer({ value, className }: CellRendererProps) {
   return (
     <span
       className={cn(
-        'block truncate',
+        'block truncate text-[11px]',
         {
           'text-muted-foreground/40 italic font-mono text-[10px]': type === 'null',
           'tabular-nums text-amber-400/90': type === 'number',
           'font-mono text-sky-400/90': type === 'boolean',
           'text-emerald-400/80': type === 'date',
+          'font-mono text-violet-400/70 text-[10px]': type === 'objectid',
           'font-mono text-orange-400/70 text-[10px]': type === 'json',
           '': type === 'text',
         },

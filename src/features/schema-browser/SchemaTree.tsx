@@ -88,6 +88,7 @@ export function SchemaTree() {
       setTables([]);
       setMongoDbs([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeConnectionId]);
 
   const toggleTable = (index: number) => {
@@ -209,7 +210,11 @@ export function SchemaTree() {
         {isMongo && mongoDbs.map((db, dbIndex) => (
           <div key={db.name}>
             <button
-              className="w-full flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-muted/30 text-left transition-colors"
+              className={`w-full flex items-center gap-1.5 px-2 py-1 rounded-md text-left transition-colors ${
+                db.isExpanded
+                  ? 'bg-accent/40 text-accent-foreground'
+                  : 'hover:bg-muted/30'
+              }`}
               onClick={() => toggleMongoDb(dbIndex)}
             >
               {db.isExpanded ? (
