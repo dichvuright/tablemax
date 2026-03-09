@@ -143,9 +143,12 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
     const connectionId = get().activeConnectionId;
     if (!connectionId) return;
 
+    const connection = get().connections.find(c => c.id === connectionId);
+    if (!connection) return;
+
     set({ isExecuting: true, queryError: null, queryResult: null });
     try {
-      const result = await api.executeQuery(connectionId, query);
+      const result = await api.executeQuery(connection, query);
       set({ queryResult: result, isExecuting: false });
     } catch (err) {
       set({
