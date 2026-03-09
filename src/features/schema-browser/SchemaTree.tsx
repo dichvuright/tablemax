@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useConnectionStore } from '@/features/connection/connectionStore';
+import { useTabStore } from '@/features/query-editor/tabStore';
 import * as api from '@/services/tauri-api';
 import {
   ChevronRight,
@@ -139,18 +140,18 @@ export function SchemaTree() {
   };
 
   const handleTableClick = (tableName: string) => {
-    if (isMongo) {
-      const query = `db.${tableName}.find({})`;
-      useConnectionStore.getState().executeQuery(query);
-    } else {
-      const query = `SELECT * FROM ${tableName} LIMIT 100;`;
-      useConnectionStore.getState().executeQuery(query);
-    }
+    const { activeTabId, updateTabQuery } = useTabStore.getState();
+    if (!activeTabId) return;
+    const query = isMongo
+      ? `db.${tableName}.find({})`
+      : `SELECT * FROM ${tableName} LIMIT 100;`;
+    updateTabQuery(activeTabId, query);
   };
 
   const handleMongoCollectionClick = (collName: string) => {
-    const query = `db.${collName}.find({})`;
-    useConnectionStore.getState().executeQuery(query);
+    const { activeTabId, updateTabQuery } = useTabStore.getState();
+    if (!activeTabId) return;
+    updateTabQuery(activeTabId, `db.${collName}.find({})`);
   };
 
   if (!activeConnectionId) return null;

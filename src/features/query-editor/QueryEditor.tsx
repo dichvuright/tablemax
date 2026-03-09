@@ -129,7 +129,10 @@ export function QueryEditor() {
           onChange={e => updateTabQuery(activeTab.id, e.target.value)}
           onKeyDown={handleKeyDown}
           className="w-full h-28 px-4 py-3 bg-transparent resize-y outline-none font-mono text-xs leading-relaxed placeholder:text-muted-foreground/20 min-h-14 max-h-72"
-          placeholder="Write your SQL query here..."
+          placeholder={activeConnection?.type === 'mongodb'
+            ? 'db.collection.find({})  or  db.collection.aggregate([...])'
+            : 'Write your SQL query here...'
+          }
           spellCheck={false}
         />
       </div>
