@@ -73,7 +73,7 @@ function getEffectiveConnectionString(connection: DatabaseConnection): string {
     if (!uri.includes('://')) {
       switch (connection.type) {
         case 'postgres':
-          uri = `postgresql://${uri}`;
+          uri = `postgres://${uri}`;
           break;
         case 'mysql':
           uri = `mysql://${uri}`;
@@ -89,9 +89,9 @@ function getEffectiveConnectionString(connection: DatabaseConnection): string {
       }
     }
 
-    // Auto-fix: postgres:// → postgresql:// (tauri-plugin-sql expects postgresql://)
-    if (connection.type === 'postgres' && uri.startsWith('postgres://') && !uri.startsWith('postgresql://')) {
-      uri = 'postgresql' + uri.slice('postgres'.length);
+    // Auto-fix: postgresql:// → postgres:// (tauri-plugin-sql expects postgres://)
+    if (connection.type === 'postgres' && uri.startsWith('postgresql://')) {
+      uri = 'postgres' + uri.slice('postgresql'.length);
     }
 
     // Auto-fix: ensure Postgres/MySQL URIs have a database name in the path
