@@ -2,36 +2,56 @@ import { invoke } from '@tauri-apps/api/core';
 import Database from '@tauri-apps/plugin-sql';
 import type { DatabaseConnection, ConnectionTestResult, QueryResult } from '../../shared/types/connection';
 
+/**
+ * Helper: check if we're running inside the Tauri webview.
+ * When running via `npm run dev` (Vite only), the Tauri runtime is absent.
+ * Use `npm run tauri dev` for the full app with backend.
+ */
+function isTauriAvailable(): boolean {
+  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+}
+
+/** Safe wrapper around invoke that gives a clear error in browser-only mode */
+async function safeInvoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
+  if (!isTauriAvailable()) {
+    throw new Error(
+      `Tauri runtime not available. Run "npm run tauri dev" instead of "npm run dev" to start the full app with backend.`
+    );
+  }
+  return invoke<T>(cmd, args);
+}
+
 // Connection persistence (via Rust commands)
 export async function saveConnections(connections: DatabaseConnection[]): Promise<void> {
-  return invoke('save_connections', { connections });
+  return safeInvoke('save_connections', { connections });
 }
 
 export async function loadConnections(): Promise<DatabaseConnection[]> {
-  return invoke<DatabaseConnection[]>('load_connections');
+  if (!isTauriAvailable()) return []; // Graceful fallback: return empty list in browser
+  return safeInvoke<DatabaseConnection[]>('load_connections');
 }
 
 // Connection testing (via Rust commands)
 export async function testConnection(connection: DatabaseConnection): Promise<ConnectionTestResult> {
   if (connection.type === 'mongodb') {
     const connString = getEffectiveConnectionString(connection);
-    return invoke<ConnectionTestResult>('mongo_test_connection', { connString });
+    return safeInvoke<ConnectionTestResult>('mongo_test_connection', { connString });
   }
-  return invoke<ConnectionTestResult>('test_connection', { connection });
+  return safeInvoke<ConnectionTestResult>('test_connection', { connection });
 }
 
 // Connection management (via Rust for validation)
 export async function connectDatabase(connectionId: string): Promise<void> {
-  return invoke('connect_db', { connectionId });
+  return safeInvoke('connect_db', { connectionId });
 }
 
 export async function disconnectDatabase(connectionId: string): Promise<void> {
-  return invoke('disconnect_db', { connectionId });
+  return safeInvoke('disconnect_db', { connectionId });
 }
 
 // Build connection string (via Rust)
 export async function buildConnectionString(connection: DatabaseConnection): Promise<string> {
-  return invoke<string>('build_connection_string', {
+  return safeInvoke<string>('build_connection_string', {
     dbType: connection.type,
     host: connection.host,
     port: connection.port,
@@ -74,7 +94,7 @@ function getEffectiveConnectionString(connection: DatabaseConnection): string {
 
 // Get list tables query (via Rust)
 export async function getListTablesQuery(dbType: string): Promise<string> {
-  return invoke<string>('get_list_tables_query', { dbType });
+  return safeInvoke<string>('get_list_tables_query', { dbType });
 }
 
 // Database connection pool (frontend-side via tauri-plugin-sql) — SQL databases only
@@ -101,14 +121,14 @@ export async function closeDbConnection(connectionId: string): Promise<void> {
     dbPool.delete(connectionId);
   }
   // Also disconnect MongoDB if applicable
-  await invoke('mongo_disconnect', { connectionId }).catch(() => {});
+  await safeInvoke('mongo_disconnect', { connectionId }).catch(() => {});
 }
 
 // ─── MongoDB-specific functions ─────────────────────────────────
 
 export async function mongoListCollections(connection: DatabaseConnection): Promise<string[]> {
   const connString = getEffectiveConnectionString(connection);
-  return invoke<string[]>('mongo_list_collections', {
+  return safeInvoke<string[]>('mongo_list_collections', {
     connectionId: connection.id,
     connString,
     database: connection.database,
@@ -122,7 +142,7 @@ export async function mongoFind(
   limit?: number,
 ): Promise<QueryResult> {
   const connString = getEffectiveConnectionString(connection);
-  return invoke<QueryResult>('mongo_find', {
+  return safeInvoke<QueryResult>('mongo_find', {
     connectionId: connection.id,
     connString,
     database: connection.database,
@@ -138,7 +158,7 @@ export async function mongoAggregate(
   pipeline: string,
 ): Promise<QueryResult> {
   const connString = getEffectiveConnectionString(connection);
-  return invoke<QueryResult>('mongo_aggregate', {
+  return safeInvoke<QueryResult>('mongo_aggregate', {
     connectionId: connection.id,
     connString,
     database: connection.database,
