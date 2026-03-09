@@ -14,7 +14,7 @@ export async function loadConnections(): Promise<DatabaseConnection[]> {
 // Connection testing (via Rust commands)
 export async function testConnection(connection: DatabaseConnection): Promise<ConnectionTestResult> {
   if (connection.type === 'mongodb') {
-    const connString = buildMongoConnectionString(connection);
+    const connString = getEffectiveConnectionString(connection);
     return invoke<ConnectionTestResult>('mongo_test_connection', { connString });
   }
   return invoke<ConnectionTestResult>('test_connection', { connection });
@@ -38,16 +38,38 @@ export async function buildConnectionString(connection: DatabaseConnection): Pro
     username: connection.username,
     password: connection.password,
     database: connection.database,
+    connectionMethod: connection.connectionMethod,
+    uri: connection.uri || null,
+    authSource: connection.authSource || null,
   });
 }
 
-// Build MongoDB connection string locally (for frontend use)
-function buildMongoConnectionString(connection: DatabaseConnection): string {
-  const { host, port, username, password, database } = connection;
-  if (!username) {
-    return `mongodb://${host}:${port}/${database}`;
+/** Get effective connection string — handles both form and URI modes */
+function getEffectiveConnectionString(connection: DatabaseConnection): string {
+  if (connection.connectionMethod === 'uri' && connection.uri) {
+    return connection.uri;
   }
-  return `mongodb://${username}:${password}@${host}:${port}/${database}`;
+
+  const { type, host, port, username, password, database, authSource } = connection;
+  switch (type) {
+    case 'mysql':
+      return `mysql://${username}:${password}@${host}:${port}/${database}`;
+    case 'postgres':
+      return `postgres://${username}:${password}@${host}:${port}/${database}`;
+    case 'sqlite':
+      return `sqlite:${database}`;
+    case 'mongodb': {
+      const authParam = authSource ? `?authSource=${authSource}` : '';
+      if (!username) return `mongodb://${host}:${port}/${database}${authParam}`;
+      return `mongodb://${username}:${password}@${host}:${port}/${database}${authParam}`;
+    }
+    case 'redis':
+      if (!username && !password) return `redis://${host}:${port}`;
+      if (!username) return `redis://:${password}@${host}:${port}`;
+      return `redis://${username}:${password}@${host}:${port}`;
+    default:
+      return '';
+  }
 }
 
 // Get list tables query (via Rust)
@@ -59,8 +81,8 @@ export async function getListTablesQuery(dbType: string): Promise<string> {
 const dbPool: Map<string, Database> = new Map();
 
 export async function getDbConnection(connection: DatabaseConnection): Promise<Database> {
-  if (connection.type === 'mongodb') {
-    throw new Error('Use MongoDB-specific functions for MongoDB connections');
+  if (connection.type === 'mongodb' || connection.type === 'redis') {
+    throw new Error(`Use ${connection.type}-specific functions for ${connection.type} connections`);
   }
 
   const existing = dbPool.get(connection.id);
@@ -85,7 +107,7 @@ export async function closeDbConnection(connectionId: string): Promise<void> {
 // ─── MongoDB-specific functions ─────────────────────────────────
 
 export async function mongoListCollections(connection: DatabaseConnection): Promise<string[]> {
-  const connString = buildMongoConnectionString(connection);
+  const connString = getEffectiveConnectionString(connection);
   return invoke<string[]>('mongo_list_collections', {
     connectionId: connection.id,
     connString,
@@ -99,7 +121,7 @@ export async function mongoFind(
   filter?: string,
   limit?: number,
 ): Promise<QueryResult> {
-  const connString = buildMongoConnectionString(connection);
+  const connString = getEffectiveConnectionString(connection);
   return invoke<QueryResult>('mongo_find', {
     connectionId: connection.id,
     connString,
@@ -115,7 +137,7 @@ export async function mongoAggregate(
   collection: string,
   pipeline: string,
 ): Promise<QueryResult> {
-  const connString = buildMongoConnectionString(connection);
+  const connString = getEffectiveConnectionString(connection);
   return invoke<QueryResult>('mongo_aggregate', {
     connectionId: connection.id,
     connString,
@@ -134,6 +156,11 @@ export async function executeQuery(
   // MongoDB path
   if (connection.type === 'mongodb') {
     return executeMongoQuery(connection, query);
+  }
+
+  // Redis path (TODO: implement Redis commands)
+  if (connection.type === 'redis') {
+    throw new Error('Redis query execution not yet implemented');
   }
 
   // SQL path (via tauri-plugin-sql JS API)
