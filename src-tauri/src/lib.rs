@@ -1,4 +1,5 @@
 mod commands;
+mod bridge;
 
 use commands::connection;
 use commands::mongodb as mongo_cmd;
@@ -24,6 +25,7 @@ pub fn run() {
             mongo_cmd::mongo_find,
             mongo_cmd::mongo_aggregate,
             mongo_cmd::mongo_disconnect,
+            bridge::cpp_bridge::engine_version,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
