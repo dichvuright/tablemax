@@ -75,9 +75,6 @@ export function ColorPicker({ value, onChange, label = 'Color', className }: Col
           className="grid size-8 place-content-center rounded-md cursor-pointer"
           style={{ backgroundColor: value }}
         >
-          <Palette
-            className={cn('size-4', isHexDark(value) ? 'text-white/80' : 'text-black/60')}
-          />
         </PopoverTrigger>
         <PopoverContent className="w-[228px] gap-0! p-3">
           <Tabs defaultValue="presets" className="w-full block!">
@@ -94,9 +91,6 @@ export function ColorPicker({ value, onChange, label = 'Color', className }: Col
                     onClick={() => onChange(preset)}
                     className={cn(
                       'relative size-7 rounded-full border-2 transition-all hover:scale-110',
-                      value === preset
-                        ? 'ring-2 ring-primary border-primary/30'
-                        : 'border-transparent hover:border-foreground/20',
                     )}
                     style={{ backgroundColor: preset }}
                   >
