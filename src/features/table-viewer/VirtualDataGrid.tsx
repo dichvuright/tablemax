@@ -17,7 +17,6 @@ import {
 import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import { useRef, useMemo, useCallback } from 'react';
 import { CellRenderer, copyCellValue } from './CellRenderer';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Tooltip,

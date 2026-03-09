@@ -1,5 +1,4 @@
 import { useTabStore } from './tabStore';
-import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
@@ -55,15 +54,11 @@ export function QueryTabs() {
 
       {/* Add tab button */}
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 shrink-0 rounded-none border-l border-border/40"
-            onClick={addTab}
-          >
-            <Plus className="h-3.5 w-3.5" />
-          </Button>
+        <TooltipTrigger
+          className="h-8 w-8 p-0 shrink-0 inline-flex items-center justify-center rounded-none border-l border-border/40 hover:bg-muted transition-colors"
+          onClick={addTab}
+        >
+          <Plus className="h-3.5 w-3.5" />
         </TooltipTrigger>
         <TooltipContent side="bottom" className="text-xs">
           New Query Tab (Ctrl+N)
