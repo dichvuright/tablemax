@@ -1,4 +1,4 @@
-export type DatabaseType = 'mysql' | 'postgres' | 'sqlite';
+export type DatabaseType = 'mysql' | 'postgres' | 'sqlite' | 'mongodb';
 
 export interface DatabaseConnection {
   id: string;
@@ -29,16 +29,19 @@ export const DB_DEFAULT_PORTS: Record<DatabaseType, number> = {
   mysql: 3306,
   postgres: 5432,
   sqlite: 0,
+  mongodb: 27017,
 };
 
 export const DB_LABELS: Record<DatabaseType, string> = {
   mysql: 'MySQL',
   postgres: 'PostgreSQL',
   sqlite: 'SQLite',
+  mongodb: 'MongoDB',
 };
 
 export const DB_COLORS: Record<DatabaseType, string> = {
   mysql: '#00758F',
   postgres: '#336791',
   sqlite: '#003B57',
+  mongodb: '#47A248',
 };

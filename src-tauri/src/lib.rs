@@ -1,6 +1,7 @@
 mod commands;
 
 use commands::connection;
+use commands::mongodb as mongo_cmd;
 use commands::query;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -9,6 +10,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .manage(mongo_cmd::MongoPool::default())
         .invoke_handler(tauri::generate_handler![
             connection::test_connection,
             connection::connect_db,
@@ -17,6 +19,11 @@ pub fn run() {
             connection::load_connections,
             query::build_connection_string,
             query::get_list_tables_query,
+            mongo_cmd::mongo_test_connection,
+            mongo_cmd::mongo_list_collections,
+            mongo_cmd::mongo_find,
+            mongo_cmd::mongo_aggregate,
+            mongo_cmd::mongo_disconnect,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
