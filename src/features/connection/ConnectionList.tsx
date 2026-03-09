@@ -14,6 +14,7 @@ import {
   Trash2,
   Copy,
 } from 'lucide-react';
+import { DatabaseIcon } from '@/components/icons/database-icons';
 import { generateId } from '@/services/tauri-api';
 import { toast } from 'sonner';
 
@@ -63,8 +64,8 @@ export function ConnectionList() {
 
   if (connections.length === 0) {
     return (
-      <div className="px-4 py-6 text-center">
-        <p className="text-xs text-muted-foreground/60">
+      <div className="px-4 py-8 text-center">
+        <p className="text-[11px] text-muted-foreground/40">
           No connections yet
         </p>
       </div>
@@ -72,35 +73,40 @@ export function ConnectionList() {
   }
 
   return (
-    <div className="px-2 space-y-0.5">
+    <div className="px-2 space-y-px">
       {connections.map(conn => {
         const isActive = conn.id === activeConnectionId;
 
         return (
           <ContextMenu key={conn.id}>
             <ContextMenuTrigger
-              className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-left transition-colors group cursor-default ${
+              className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-left transition-all duration-150 group cursor-default ${
                 isActive
                   ? 'bg-accent text-accent-foreground'
-                  : 'hover:bg-accent/50 text-foreground/80'
+                  : 'hover:bg-muted/40 text-foreground/80'
               }`}
               onClick={() => handleConnect(conn.id)}
             >
+              {/* DB Icon */}
               <div
-                className="w-2 h-2 rounded-full shrink-0 ring-1 ring-white/10"
-                style={{ backgroundColor: conn.color }}
-              />
+                className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+                style={{ backgroundColor: `${conn.color}15`, border: `1px solid ${conn.color}25` }}
+              >
+                <DatabaseIcon type={conn.type} className="size-3.5" />
+              </div>
+
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium truncate">
+                <div className="text-xs font-medium truncate leading-tight">
                   {conn.name}
                 </div>
-                <div className="text-[10px] text-muted-foreground truncate">
+                <div className="text-[10px] text-muted-foreground/60 truncate leading-tight">
                   {DB_LABELS[conn.type]}
                   {conn.type !== 'sqlite' && ` · ${conn.host}:${conn.port}`}
                 </div>
               </div>
+
               {isActive && (
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 animate-pulse" />
               )}
             </ContextMenuTrigger>
             <ContextMenuContent>

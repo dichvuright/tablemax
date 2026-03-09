@@ -1,6 +1,5 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useConnectionStore } from '@/features/connection/connectionStore';
 import { useTabStore } from './tabStore';
 import * as api from '@/services/tauri-api';
@@ -26,7 +25,6 @@ export function QueryEditor() {
 
   const activeConnection = connections.find(c => c.id === activeConnectionId);
 
-  // Auto-focus when tab changes
   useEffect(() => {
     textareaRef.current?.focus();
   }, [activeTabId]);
@@ -53,7 +51,6 @@ export function QueryEditor() {
     }
   }, [activeTab, activeConnection, updateTabExecuting, updateTabError, updateTabResult]);
 
-  // Also update the connection store for backward compat
   useEffect(() => {
     if (activeTab) {
       const store = useConnectionStore.getState();
@@ -64,12 +61,10 @@ export function QueryEditor() {
   }, [activeTab?.result]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Ctrl+Enter or Cmd+Enter to run
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
       handleRun();
     }
-    // Tab key inserts spaces
     if (e.key === 'Tab') {
       e.preventDefault();
       const textarea = textareaRef.current;
@@ -96,13 +91,13 @@ export function QueryEditor() {
   if (!activeTab) return null;
 
   return (
-    <div className="shrink-0 border-b border-border">
+    <div className="shrink-0 border-b border-border/40">
       {/* Toolbar */}
-      <div className="h-9 px-3 flex items-center gap-1.5 bg-muted/30">
+      <div className="h-8 px-2 flex items-center gap-1 bg-muted/10 border-b border-border/20">
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 px-2 gap-1 text-xs"
+          className="h-6 px-2 gap-1 text-[11px]"
           onClick={handleRun}
           disabled={activeTab.isExecuting || !activeTab.query.trim()}
         >
@@ -113,19 +108,18 @@ export function QueryEditor() {
           )}
           Run
         </Button>
-        <span className="text-[10px] text-muted-foreground/60">Ctrl+Enter</span>
+        <span className="text-[9px] text-muted-foreground/30 font-mono">Ctrl+Enter</span>
         <div className="flex-1" />
         <Button
           variant="ghost"
           size="sm"
-          className="h-6 px-2 gap-1 text-xs text-muted-foreground"
+          className="h-6 px-2 gap-1 text-[11px] text-muted-foreground/50"
           onClick={handleClear}
         >
           <Trash2 className="h-3 w-3" />
           Clear
         </Button>
       </div>
-      <Separator />
 
       {/* Editor */}
       <div className="relative">
@@ -134,7 +128,7 @@ export function QueryEditor() {
           value={activeTab.query}
           onChange={e => updateTabQuery(activeTab.id, e.target.value)}
           onKeyDown={handleKeyDown}
-          className="w-full h-32 px-4 py-3 bg-background resize-y outline-none font-mono text-sm leading-relaxed placeholder:text-muted-foreground/40 min-h-16 max-h-80"
+          className="w-full h-28 px-4 py-3 bg-transparent resize-y outline-none font-mono text-xs leading-relaxed placeholder:text-muted-foreground/20 min-h-14 max-h-72"
           placeholder="Write your SQL query here..."
           spellCheck={false}
         />
