@@ -224,7 +224,6 @@ export function ConnectionForm() {
   return (
     <Dialog open={isFormOpen} onOpenChange={(open) => !open && closeForm()}>
       <DialogContent className="sm:max-w-[600px] p-0 gap-0 overflow-hidden border-border/50">
-        {/* Header */}
         <div className="px-5 pt-5 pb-4">
           <DialogHeader>
             <DialogTitle className="text-base font-semibold">
@@ -234,7 +233,6 @@ export function ConnectionForm() {
         </div>
 
         <div className="px-5 pb-4 space-y-4">
-          {/* Name + Color */}
           <div className="flex gap-3 items-end">
             <div className="flex-1 space-y-1.5">
               <Label htmlFor="conn-name" className="text-[11px] text-muted-foreground uppercase tracking-wider">Name</Label>
@@ -251,8 +249,6 @@ export function ConnectionForm() {
               label=""
             />
           </div>
-
-          {/* DB Type + Method */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">Type</Label>
@@ -298,10 +294,7 @@ export function ConnectionForm() {
               </Select>
             </div>
           </div>
-
           <div className="h-px bg-border/40" />
-
-          {/* Connection Details */}
           {form.connectionMethod === 'uri' ? (
             <div className="space-y-1.5">
               <Label htmlFor="conn-uri" className="text-[11px] text-muted-foreground uppercase tracking-wider">Connection URI</Label>
@@ -396,8 +389,6 @@ export function ConnectionForm() {
                   </button>
                 </div>
               )}
-
-              {/* URI Preview */}
               <div className="rounded-md border border-border/30 bg-muted/10 px-3 py-2">
                 <p className="text-[9px] text-muted-foreground/40 uppercase tracking-widest mb-0.5">Connection String</p>
                 <code className="text-[10px] font-mono text-foreground/50 break-all leading-relaxed">
@@ -407,8 +398,6 @@ export function ConnectionForm() {
             </div>
           )}
         </div>
-
-        {/* Test result */}
         {testResult && (
           <div className="px-5 pb-3">
             <div className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs ${
@@ -422,8 +411,6 @@ export function ConnectionForm() {
             </div>
           </div>
         )}
-
-        {/* Footer */}
         <div className="flex items-center gap-2 px-5 py-3 border-t border-border/30">
           <Button variant="outline" size="sm" onClick={handleTest} disabled={isTesting} className="gap-1.5">
             {isTesting ? <Loader2 className="size-3.5 animate-spin" /> : <Zap className="size-3.5" />}

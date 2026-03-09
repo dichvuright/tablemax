@@ -21,9 +21,7 @@ private:
     bool connected_ = false;
     std::string cs_, error_;
 };
-
-} // namespace tablemax
-
+} 
 extern "C" {
     tablemax::IDbPlugin* create_plugin() { return new tablemax::MongoPlugin(); }
     void destroy_plugin(tablemax::IDbPlugin* p) { delete p; }
