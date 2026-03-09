@@ -72,7 +72,7 @@ export function ColorPicker({ value, onChange, label = 'Color', className }: Col
       )}
       <Popover>
         <PopoverTrigger
-          className="border-foreground/10 grid size-9 place-content-center rounded-md border outline-2 outline-offset-2 outline-transparent duration-200 hover:outline-primary cursor-pointer"
+          className="grid size-8 place-content-center rounded-md cursor-pointer"
           style={{ backgroundColor: value }}
         >
           <Palette
@@ -85,7 +85,7 @@ export function ColorPicker({ value, onChange, label = 'Color', className }: Col
               <TabsTrigger value="presets">Presets</TabsTrigger>
               <TabsTrigger value="picker">Custom</TabsTrigger>
             </TabsList>
-            <TabsContent value="presets" className="flex-none [&[hidden]]:hidden">
+            <TabsContent value="presets" className="flex-none [[hidden]]:hidden">
               <div className="flex max-h-44 flex-wrap gap-1 overflow-y-auto justify-center">
                 {COLOR_PRESETS.map((preset, idx) => (
                   <button
