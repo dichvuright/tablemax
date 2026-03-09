@@ -64,7 +64,7 @@ export function ColorPicker({ value, onChange, label = 'Color', className }: Col
   };
 
   return (
-    <div className={cn('grid gap-2 self-start w-fit', className)}>
+    <div className={cn('grid gap-2 w-fit', className)}>
       {label && (
         <Label className="text-sm text-foreground leading-none block">
           {label}

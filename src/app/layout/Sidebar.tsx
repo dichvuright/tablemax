@@ -12,7 +12,7 @@ export function Sidebar() {
     <aside className="w-60 h-full border-r border-border/50 bg-card/20 flex flex-col shrink-0">
       {/* Header */}
       <div className="h-10 px-3 flex items-center gap-2 border-b border-border/50 shrink-0" data-tauri-drag-region>
-        <div className="w-5 h-5 rounded bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+        <div className="w-5 h-5 rounded bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
           <Database className="h-3 w-3 text-white" />
         </div>
         <span className="font-semibold text-xs tracking-tight">TableMax</span>

@@ -42,7 +42,7 @@ export function QueryTabs() {
               <span className="text-[11px] truncate font-mono">{tab.title}</span>
               {tabs.length > 1 && (
                 <button
-                  className="h-4 w-4 rounded flex items-center justify-center opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:bg-muted transition-all shrink-0 ml-1"
+                  className="h-4 w-4 rounded flex items-center justify-center opacity-0 group-hover:opacity-60 hover:opacity-100! hover:bg-muted transition-all shrink-0 ml-1"
                   onClick={(e) => {
                     e.stopPropagation();
                     removeTab(tab.id);
