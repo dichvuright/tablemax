@@ -191,7 +191,6 @@ export function ConnectionForm() {
       conn.name = `${DB_LABELS[conn.type]} Connection`;
     }
 
-    // Validate
     if (conn.connectionMethod === 'uri') {
       if (!conn.uri?.trim()) {
         toast.error('Please enter a connection URI');
@@ -223,44 +222,49 @@ export function ConnectionForm() {
   const isSqlite = form.type === 'sqlite';
   const isRedis = form.type === 'redis';
   const isMongo = form.type === 'mongodb';
+  const currentDbType = form.type || 'mysql';
 
   return (
     <Dialog open={isFormOpen} onOpenChange={(open) => !open && closeForm()}>
-      <DialogContent className="sm:max-w-[520px]">
-        <DialogHeader>
-          <DialogTitle>
-            {editingConnection ? 'Edit Connection' : 'New Connection'}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[540px] p-0 gap-0 overflow-hidden">
+        {/* ─── Header with gradient accent ─── */}
+        <div className="relative px-6 pt-6 pb-4">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold">
+              {editingConnection ? 'Edit Connection' : 'New Connection'}
+            </DialogTitle>
+          </DialogHeader>
+        </div>
 
-        <div className="space-y-4 py-2">
-          {/* Connection Name + Color */}
-          <div className="space-y-2">
-            <Label htmlFor="conn-name">Connection Name</Label>
-            <div className="flex gap-3 items-end">
-              <div className="flex-1">
-                <Input
-                  id="conn-name"
-                  placeholder="My Database"
-                  value={form.name || ''}
-                  onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
-                />
-              </div>
-              <ColorPicker
-                value={form.color || '#6366f1'}
-                onChange={(color) => setForm(prev => ({ ...prev, color }))}
-                label=""
+        <div className="px-6 pb-2 space-y-4">
+          {/* ─── Connection Name + Color ─── */}
+          <div className="flex gap-3 items-end">
+            <div className="flex-1 space-y-1.5">
+              <Label htmlFor="conn-name" className="text-xs text-muted-foreground">Connection Name</Label>
+              <Input
+                id="conn-name"
+                placeholder="My Database"
+                value={form.name || ''}
+                onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
               />
             </div>
+            <ColorPicker
+              value={form.color || '#6366f1'}
+              onChange={(color) => setForm(prev => ({ ...prev, color }))}
+              label=""
+            />
           </div>
 
-          {/* Database Type + Connection Method */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>Database Type</Label>
+          {/* ─── Database Type + Connection Method ─── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Database Type</Label>
               <Select value={form.type} onValueChange={handleDbTypeChange}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>
+                    <DatabaseIcon type={currentDbType} className="size-4 shrink-0" />
+                    {DB_LABELS[currentDbType]}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {DB_TYPES.map(t => (
@@ -272,32 +276,41 @@ export function ConnectionForm() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Connection Method</Label>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Connection Method</Label>
               <Select value={form.connectionMethod} onValueChange={handleConnectionMethodChange}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>
+                    {form.connectionMethod === 'uri' ? (
+                      <><Link2 className="size-3.5 shrink-0" /> URI String</>
+                    ) : (
+                      <><FormInput className="size-3.5 shrink-0" /> Form Fields</>
+                    )}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="form">
-                    <FormInput className="size-3.5 mr-1 inline" />
-                    Form
+                    <FormInput className="size-3.5" />
+                    Form Fields
                   </SelectItem>
                   <SelectItem value="uri">
-                    <Link2 className="size-3.5 mr-1 inline" />
-                    URI
+                    <Link2 className="size-3.5" />
+                    URI String
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Connection Details */}
+          {/* ─── Divider ─── */}
+          <div className="border-t border-border/40" />
+
+          {/* ─── Connection Details ─── */}
           {form.connectionMethod === 'uri' ? (
-            /* ─── URI Mode ─── */
+            /* ═══ URI Mode ═══ */
             <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="conn-uri">Connection URI</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="conn-uri" className="text-xs text-muted-foreground">Connection URI</Label>
                 <Input
                   id="conn-uri"
                   placeholder={
@@ -315,18 +328,18 @@ export function ConnectionForm() {
                   onChange={e => handleUriChange(e.target.value)}
                   className="font-mono text-xs"
                 />
-                <p className="text-[10px] text-muted-foreground">
-                  Paste your full connection string. DB type is auto-detected from the URI prefix.
+                <p className="text-[10px] text-muted-foreground/60">
+                  DB type is auto-detected from the URI prefix.
                 </p>
               </div>
             </div>
           ) : (
-            /* ─── Form Mode ─── */
+            /* ═══ Form Mode ═══ */
             <div className="space-y-3">
               {!isSqlite && (
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="col-span-2 space-y-2">
-                    <Label htmlFor="conn-host">Host</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_100px] gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="conn-host" className="text-xs text-muted-foreground">Host</Label>
                     <Input
                       id="conn-host"
                       placeholder="localhost"
@@ -334,8 +347,8 @@ export function ConnectionForm() {
                       onChange={e => setForm(prev => ({ ...prev, host: e.target.value }))}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="conn-port">Port</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="conn-port" className="text-xs text-muted-foreground">Port</Label>
                     <Input
                       id="conn-port"
                       type="number"
@@ -347,9 +360,9 @@ export function ConnectionForm() {
               )}
 
               {!isSqlite && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="conn-user">Username</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="conn-user" className="text-xs text-muted-foreground">Username</Label>
                     <Input
                       id="conn-user"
                       placeholder={form.type === 'mysql' ? 'root' : 'user'}
@@ -357,8 +370,8 @@ export function ConnectionForm() {
                       onChange={e => setForm(prev => ({ ...prev, username: e.target.value }))}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="conn-pass">Password</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="conn-pass" className="text-xs text-muted-foreground">Password</Label>
                     <div className="relative">
                       <Input
                         id="conn-pass"
@@ -371,7 +384,7 @@ export function ConnectionForm() {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
                       >
                         {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
                       </button>
@@ -381,8 +394,8 @@ export function ConnectionForm() {
               )}
 
               {!isRedis && (
-                <div className="space-y-2">
-                  <Label htmlFor="conn-db">
+                <div className="space-y-1.5">
+                  <Label htmlFor="conn-db" className="text-xs text-muted-foreground">
                     {isSqlite ? 'Database File Path' : 'Database'}
                   </Label>
                   <Input
@@ -394,57 +407,61 @@ export function ConnectionForm() {
                 </div>
               )}
 
-              {/* MongoDB-specific: Auth Source */}
+              {/* MongoDB: Auth Source */}
               {isMongo && (
-                <div className="space-y-2">
-                  <Label htmlFor="conn-auth-source">Auth Source</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="conn-auth-source" className="text-xs text-muted-foreground">Auth Source</Label>
                   <Input
                     id="conn-auth-source"
                     placeholder="admin"
                     value={form.authSource || ''}
                     onChange={e => setForm(prev => ({ ...prev, authSource: e.target.value }))}
                   />
-                  <p className="text-[10px] text-muted-foreground">
-                    Authentication database (default: admin)
-                  </p>
                 </div>
               )}
 
-              {/* SSL Toggle */}
+              {/* Options row: SSL */}
               {!isSqlite && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 pt-1">
                   <button
                     type="button"
                     onClick={() => setForm(prev => ({ ...prev, ssl: !prev.ssl }))}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs transition-colors ${
-                      form.ssl 
-                        ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' 
-                        : 'border-border text-muted-foreground hover:text-foreground'
-                    }`}
+                    className={`
+                      flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs font-medium
+                      transition-all duration-200
+                      ${form.ssl
+                        ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.1)]'
+                        : 'border-border/60 text-muted-foreground hover:text-foreground hover:border-border'
+                      }
+                    `}
                   >
                     <ShieldCheck className="size-3.5" />
-                    SSL {form.ssl ? 'Enabled' : 'Disabled'}
+                    SSL/TLS
                   </button>
                 </div>
               )}
 
               {/* URI Preview */}
-              <div className="rounded-md border border-border/50 bg-muted/30 p-2">
-                <p className="text-[10px] text-muted-foreground mb-1">Connection String Preview</p>
-                <code className="text-[11px] font-mono text-foreground/70 break-all">
+              <div className="rounded-lg border border-border/30 bg-muted/20 p-2.5 mt-1">
+                <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider mb-1">Connection String</p>
+                <code className="text-[11px] font-mono text-foreground/60 break-all leading-relaxed">
                   {buildUriPreview(form)}
                 </code>
               </div>
             </div>
           )}
+        </div>
 
-          {/* Test Result */}
-          {testResult && (
-            <div className={`flex items-center gap-2 p-2.5 rounded-md text-sm ${
-              testResult.success
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                : 'bg-red-500/10 text-red-400 border border-red-500/20'
-            }`}>
+        {/* ─── Test Result ─── */}
+        {testResult && (
+          <div className="px-6 pb-2">
+            <div className={`
+              flex items-center gap-2.5 p-3 rounded-lg text-sm
+              ${testResult.success
+                ? 'bg-emerald-500/8 text-emerald-400 border border-emerald-500/15'
+                : 'bg-red-500/8 text-red-400 border border-red-500/15'
+              }
+            `}>
               {testResult.success ? (
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
               ) : (
@@ -452,23 +469,25 @@ export function ConnectionForm() {
               )}
               <span className="text-xs flex-1">{testResult.message}</span>
               {testResult.latency_ms !== undefined && (
-                <span className="text-[10px] opacity-70">{testResult.latency_ms}ms</span>
+                <span className="text-[10px] opacity-60 font-mono">{testResult.latency_ms}ms</span>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        <DialogFooter className="gap-2">
+        {/* ─── Footer ─── */}
+        <div className="flex items-center gap-2 px-6 py-4 border-t border-border/30 bg-muted/5">
           <Button
             variant="outline"
             size="sm"
             onClick={handleTest}
             disabled={isTesting}
+            className="gap-1.5"
           >
             {isTesting ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+              <Loader2 className="size-3.5 animate-spin" />
             ) : (
-              <Zap className="h-3.5 w-3.5 mr-1.5" />
+              <Zap className="size-3.5" />
             )}
             Test
           </Button>
@@ -479,7 +498,7 @@ export function ConnectionForm() {
           <Button size="sm" onClick={handleSave}>
             {editingConnection ? 'Update' : 'Save'}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
