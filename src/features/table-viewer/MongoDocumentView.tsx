@@ -169,9 +169,9 @@ function DocumentCard({
   };
 
   return (
-    <div className="group relative bg-card/30 border border-border/30 rounded-lg hover:border-border/50 transition-all hover:shadow-lg hover:shadow-primary/5">
+    <div className="group relative border border-border/40 rounded">
       {/* Header */}
-      <div className="px-3 py-1.5 border-b border-border/15 flex items-center gap-2 bg-muted/5 rounded-t-lg">
+      <div className="px-3 py-1.5 border-b border-border/30 flex items-center gap-2">
         <FileJson className="h-3 w-3 text-emerald-500/50" />
         <span className="text-[10px] text-muted-foreground/40 tabular-nums font-mono">#{index + 1}</span>
         {!!doc._id && (
@@ -235,7 +235,7 @@ function JsonView({ docs }: { docs: Record<string, unknown>[] }) {
   return (
     <div className="flex-1 overflow-auto relative">
       <button
-        className="absolute top-2 right-4 z-10 h-6 px-2 inline-flex items-center gap-1 rounded bg-muted/50 border border-border/30 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute top-2 right-4 z-10 h-6 px-2 inline-flex items-center gap-1 rounded border border-border/40 text-[10px] text-muted-foreground hover:text-foreground"
         onClick={handleCopy}
       >
         <Clipboard className="h-3 w-3" /> Copy
@@ -279,7 +279,7 @@ function TableView({ docs }: { docs: Record<string, unknown>[] }) {
   return (
     <div className="flex-1 overflow-auto">
       <table className="w-full text-[11px] font-mono">
-        <thead className="sticky top-0 bg-muted/70 backdrop-blur-sm z-10">
+        <thead className="sticky top-0 bg-muted/50 z-10">
           <tr className="border-b border-border/40">
             <th className="px-2 py-1.5 text-left font-medium text-muted-foreground/60 w-10">#</th>
             {columns.map(col => (
@@ -289,7 +289,7 @@ function TableView({ docs }: { docs: Record<string, unknown>[] }) {
         </thead>
         <tbody>
           {docs.map((doc, i) => (
-            <tr key={i} className={`border-b border-border/10 hover:bg-muted/15 transition-colors ${i % 2 === 0 ? '' : 'bg-muted/5'}`}>
+            <tr key={i} className={`border-b border-border/10 ${i % 2 === 0 ? '' : 'bg-muted/5'}`}>
               <td className="px-2 py-1 text-muted-foreground/25 tabular-nums">{i + 1}</td>
               {columns.map(col => {
                 const val = doc[col];
@@ -354,7 +354,7 @@ function DocumentDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl rounded-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm">
             <FileJson className="h-4 w-4 text-emerald-500" />
@@ -365,7 +365,7 @@ function DocumentDialog({
           <textarea
             value={json}
             onChange={e => setJson(e.target.value)}
-            className="w-full h-64 px-3 py-2 bg-muted/20 border border-border/40 rounded-lg font-mono text-xs leading-relaxed resize-y outline-none focus:border-primary/50 transition-colors"
+            className="w-full h-64 px-3 py-2 bg-muted/10 border border-border/40 rounded font-mono text-xs leading-relaxed resize-y outline-none focus:border-primary/50"
             spellCheck={false}
           />
           {error && (
@@ -561,8 +561,8 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center space-y-3">
-          <div className="mx-auto w-12 h-12 rounded-xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center">
-            <FileJson className="h-5 w-5 text-emerald-500/30" />
+          <div className="mx-auto w-12 h-12 rounded border border-border/30 flex items-center justify-center">
+            <FileJson className="h-5 w-5 text-muted-foreground/30" />
           </div>
           <p className="text-xs text-muted-foreground/50">Click a collection to view documents</p>
         </div>
@@ -573,7 +573,7 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* ─── Toolbar ─── */}
-      <div className="h-9 px-3 flex items-center gap-1.5 bg-muted/15 border-b border-border/40 shrink-0">
+      <div className="h-9 px-3 flex items-center gap-1.5 border-b border-border/40 shrink-0">
         {/* View mode toggle */}
         <div className="flex items-center bg-muted/30 rounded-md p-0.5 gap-px">
           {[
@@ -583,10 +583,10 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
           ].map(({ mode, icon: Icon, label }) => (
             <Tooltip key={mode}>
               <TooltipTrigger
-                className={`h-6 w-6 p-0 inline-flex items-center justify-center rounded transition-all ${
+                className={`h-6 w-6 p-0 inline-flex items-center justify-center rounded ${
                   viewMode === mode
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground/50 hover:text-foreground hover:bg-muted/50'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground/50 hover:text-foreground'
                 }`}
                 onClick={() => setViewMode(mode)}
               >
@@ -611,7 +611,7 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
         {/* Action buttons */}
         <Tooltip>
           <TooltipTrigger
-            className="h-6 px-1.5 inline-flex items-center gap-1 rounded text-[10px] text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+            className="h-6 px-1.5 inline-flex items-center gap-1 rounded text-[10px] text-emerald-400 hover:bg-emerald-500/10"
             onClick={() => setInsertOpen(true)}
           >
             <Plus className="h-3 w-3" /> ADD DATA
@@ -621,7 +621,7 @@ export function MongoDocumentView({ result, error, isLoading }: MongoDocumentVie
 
         <Tooltip>
           <TooltipTrigger
-            className="h-6 px-1.5 inline-flex items-center gap-1 rounded text-[10px] text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 transition-colors"
+            className="h-6 px-1.5 inline-flex items-center gap-1 rounded text-[10px] text-muted-foreground/60 hover:text-foreground hover:bg-muted/30"
             onClick={handleExport}
           >
             <Download className="h-3 w-3" /> Export
