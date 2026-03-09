@@ -144,19 +144,14 @@ export function SchemaTree() {
   };
 
   const handleMongoCollectionClick = async (dbName: string, collName: string) => {
-    // Update database context
     if (activeConnection && activeConnection.database !== dbName) {
       const { updateConnection } = useConnectionStore.getState();
       await updateConnection({ ...activeConnection, database: dbName });
     }
-
-    // Inject query into active tab
     const { activeTabId, updateTabQuery } = useTabStore.getState();
     if (!activeTabId) return;
     const query = `db.${collName}.find({})`;
     updateTabQuery(activeTabId, query);
-
-    // Auto-execute — like Compass: click collection → see docs immediately
     setSelectedCollection(collName);
     useConnectionStore.getState().executeQuery(query);
   };
@@ -203,8 +198,6 @@ export function SchemaTree() {
             </p>
           </div>
         )}
-
-        {/* MongoDB: Database → Collection tree */}
         {isMongo && mongoDbs.map((db, dbIndex) => (
           <div key={db.name}>
             <button
@@ -251,8 +244,6 @@ export function SchemaTree() {
             )}
           </div>
         ))}
-
-        {/* SQL: Flat table list */}
         {!isMongo && tables.map((table, index) => (
           <div key={table.name}>
             <button
