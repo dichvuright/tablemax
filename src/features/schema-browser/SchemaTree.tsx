@@ -150,17 +150,25 @@ export function SchemaTree() {
       ? `db.${tableName}.find({})`
       : `SELECT * FROM ${tableName} LIMIT 100;`;
     updateTabQuery(activeTabId, query);
+    useConnectionStore.getState().executeQuery(query);
   };
 
   const handleMongoCollectionClick = async (dbName: string, collName: string) => {
-    // Make sure the connection's database matches the collection's parent database
+    // Update database context
     if (activeConnection && activeConnection.database !== dbName) {
       const { updateConnection } = useConnectionStore.getState();
       await updateConnection({ ...activeConnection, database: dbName });
     }
+
+    // Inject query into active tab
     const { activeTabId, updateTabQuery } = useTabStore.getState();
     if (!activeTabId) return;
-    updateTabQuery(activeTabId, `db.${collName}.find({})`);
+    const query = `db.${collName}.find({})`;
+    updateTabQuery(activeTabId, query);
+
+    // Auto-execute — like Compass: click collection → see docs immediately
+    setSelectedCollection(collName);
+    useConnectionStore.getState().executeQuery(query);
   };
 
   if (!activeConnectionId) return null;
