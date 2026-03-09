@@ -1,4 +1,5 @@
 import { ConnectionList } from '@/features/connection/ConnectionList';
+import { SchemaTree } from '@/features/schema-browser/SchemaTree';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useConnectionStore } from '@/features/connection/connectionStore';
@@ -6,6 +7,7 @@ import { Plus, Database } from 'lucide-react';
 
 export function Sidebar() {
   const openForm = useConnectionStore(s => s.openForm);
+  const activeConnectionId = useConnectionStore(s => s.activeConnectionId);
 
   return (
     <aside className="w-64 h-full border-r border-border bg-card/30 flex flex-col shrink-0">
@@ -40,9 +42,19 @@ export function Sidebar() {
       </div>
 
       {/* Connection List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className={`overflow-y-auto ${activeConnectionId ? '' : 'flex-1'}`}>
         <ConnectionList />
       </div>
+
+      {/* Schema Browser - shown when connected */}
+      {activeConnectionId && (
+        <>
+          <Separator />
+          <div className="flex-1 overflow-y-auto">
+            <SchemaTree />
+          </div>
+        </>
+      )}
 
       {/* Footer */}
       <div className="px-4 py-2 border-t border-border">

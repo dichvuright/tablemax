@@ -5,12 +5,16 @@ import {
   type ColumnSizingState,
   type VisibilityState,
   type RowSelectionState,
+  type HeaderGroup,
+  type Header,
+  type Row,
+  type Cell,
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
   flexRender,
 } from '@tanstack/react-table';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import { useRef, useMemo, useCallback } from 'react';
 import { CellRenderer, copyCellValue } from './CellRenderer';
 import { Button } from '@/components/ui/button';
@@ -25,21 +29,18 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
-  Copy,
   Columns3,
   Rows3,
   Timer,
   AlertCircle,
   Table as TableIcon,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Eye,
   EyeOff,
   Clipboard,
 } from 'lucide-react';
 import type { QueryResult } from '../../../shared/types/connection';
+
+type DataRow = Record<string, unknown>;
 
 interface VirtualDataGridProps {
   result: QueryResult | null;
@@ -59,11 +60,11 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
   const [showColumnPicker, setShowColumnPicker] = useState(false);
 
   // Build column definitions from result
-  const columns = useMemo<ColumnDef<Record<string, unknown>>[]>(() => {
+  const columns = useMemo<ColumnDef<DataRow>[]>(() => {
     if (!result?.columns.length) return [];
 
     // Row number column
-    const rowNumCol: ColumnDef<Record<string, unknown>> = {
+    const rowNumCol: ColumnDef<DataRow> = {
       id: '__row_num',
       header: '#',
       size: 50,
@@ -71,26 +72,26 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
       maxSize: 80,
       enableSorting: false,
       enableResizing: false,
-      cell: ({ row }) => (
+      cell: ({ row }: { row: Row<DataRow> }) => (
         <span className="text-muted-foreground/40 tabular-nums text-[10px]">
           {row.index + 1}
         </span>
       ),
     };
 
-    const dataCols: ColumnDef<Record<string, unknown>>[] = result.columns.map(col => ({
+    const dataCols: ColumnDef<DataRow>[] = result.columns.map(col => ({
       accessorKey: col,
       header: col,
       size: Math.max(100, Math.min(300, col.length * 10 + 40)),
       minSize: 60,
       maxSize: 800,
-      cell: ({ getValue }) => <CellRenderer value={getValue()} />,
+      cell: ({ getValue }: { getValue: () => unknown }) => <CellRenderer value={getValue()} />,
     }));
 
     return [rowNumCol, ...dataCols];
   }, [result?.columns]);
 
-  const data = useMemo(() => result?.rows ?? [], [result?.rows]);
+  const data = useMemo(() => (result?.rows ?? []) as DataRow[], [result?.rows]);
 
   const table = useReactTable({
     data,
@@ -218,19 +219,15 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
 
         {/* Column visibility toggle */}
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-5 w-5 p-0"
-              onClick={() => setShowColumnPicker(!showColumnPicker)}
-            >
-              {showColumnPicker ? (
-                <EyeOff className="h-3 w-3" />
-              ) : (
-                <Eye className="h-3 w-3" />
-              )}
-            </Button>
+          <TooltipTrigger
+            className="h-5 w-5 p-0 inline-flex items-center justify-center rounded-md hover:bg-muted transition-colors"
+            onClick={() => setShowColumnPicker(!showColumnPicker)}
+          >
+            {showColumnPicker ? (
+              <EyeOff className="h-3 w-3" />
+            ) : (
+              <Eye className="h-3 w-3" />
+            )}
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs">
             Toggle columns
@@ -239,15 +236,11 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
 
         {/* Copy all */}
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-5 w-5 p-0"
-              onClick={handleCopyAll}
-            >
-              <Clipboard className="h-3 w-3" />
-            </Button>
+          <TooltipTrigger
+            className="h-5 w-5 p-0 inline-flex items-center justify-center rounded-md hover:bg-muted transition-colors"
+            onClick={handleCopyAll}
+          >
+            <Clipboard className="h-3 w-3" />
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs">
             Copy all rows (TSV)
@@ -275,7 +268,7 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
                     : 'bg-muted/30 border-border/50 text-muted-foreground/50 line-through'
                 }`}
                 onClick={() =>
-                  setColumnVisibility(prev => ({ ...prev, [col]: !isVisible }))
+                  setColumnVisibility((prev: VisibilityState) => ({ ...prev, [col]: !isVisible }))
                 }
               >
                 {col}
@@ -301,9 +294,9 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
           <div style={{ minWidth: totalWidth }}>
             {/* Header */}
             <div className="sticky top-0 z-10 bg-muted/70 backdrop-blur-sm border-b border-border">
-              {table.getHeaderGroups().map(headerGroup => (
+              {table.getHeaderGroups().map((headerGroup: HeaderGroup<DataRow>) => (
                 <div key={headerGroup.id} className="flex">
-                  {headerGroup.headers.map(header => (
+                  {headerGroup.headers.map((header: Header<DataRow, unknown>) => (
                     <div
                       key={header.id}
                       className="relative flex items-center border-r border-border/40 last:border-r-0 select-none"
@@ -357,7 +350,7 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
                 position: 'relative',
               }}
             >
-              {virtualizer.getVirtualItems().map(virtualRow => {
+              {virtualizer.getVirtualItems().map((virtualRow: VirtualItem) => {
                 const row = tableRows[virtualRow.index];
                 const isSelected = row.getIsSelected();
 
@@ -380,13 +373,12 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
                       if (e.ctrlKey || e.metaKey) {
                         row.toggleSelected();
                       } else {
-                        // Copy cell on double click is handled separately
                         setRowSelection({ [row.id]: true });
                       }
                     }}
                     onDoubleClick={() => handleCopyRow(virtualRow.index)}
                   >
-                    {row.getVisibleCells().map(cell => (
+                    {row.getVisibleCells().map((cell: Cell<DataRow, unknown>) => (
                       <div
                         key={cell.id}
                         className="flex items-center px-2 border-r border-border/20 last:border-r-0 overflow-hidden"
