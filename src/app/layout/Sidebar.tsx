@@ -11,7 +11,7 @@ export function Sidebar() {
     <aside className="w-64 h-full border-r border-border bg-card/30 flex flex-col shrink-0">
       {/* Header */}
       <div className="h-12 px-4 flex items-center gap-2 border-b border-border shrink-0">
-        <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+        <div className="w-6 h-6 rounded-md bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
           <Database className="h-3.5 w-3.5 text-white" />
         </div>
         <span className="font-semibold text-sm tracking-tight">DB Studio</span>
