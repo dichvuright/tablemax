@@ -92,7 +92,6 @@ export function QueryEditor() {
 
   return (
     <div className="shrink-0 border-b border-border/40">
-      {/* Toolbar */}
       <div className="h-8 px-2 flex items-center gap-1 bg-muted/10 border-b border-border/20">
         <Button
           variant="ghost"
@@ -120,8 +119,6 @@ export function QueryEditor() {
           Clear
         </Button>
       </div>
-
-      {/* Editor */}
       <div className="relative">
         <textarea
           ref={textareaRef}

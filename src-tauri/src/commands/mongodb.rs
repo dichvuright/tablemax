@@ -7,8 +7,6 @@ use tauri::State;
 use tokio::sync::Mutex;
 
 pub type MongoPool = Arc<Mutex<HashMap<String, Client>>>;
-
-/// Get or create a MongoDB client for the given connection
 async fn get_client(
     pool: &MongoPool,
     connection_id: &str,
@@ -41,8 +39,6 @@ pub async fn mongo_test_connection(conn_string: String) -> Result<super::connect
 
     let client = Client::with_options(client_options)
         .map_err(|e| format!("Failed to create client: {}", e))?;
-
-    // Ping the server to verify connection
     let db = client.database("admin");
     db.run_command(mongodb::bson::doc! { "ping": 1 })
         .await
@@ -138,8 +134,6 @@ pub async fn mongo_find(
             .and_then(|bson| {
                 serde_json::to_value(&bson).map_err(|e| format!("JSON conversion error: {}", e))
             })?;
-
-        // Collect column keys in order of first appearance
         if let Value::Object(ref map) = json_val {
             for key in map.keys() {
                 if key_set.insert(key.clone()) {
@@ -277,8 +271,6 @@ pub async fn mongo_update_one(
             mongodb::bson::to_document(&v)
                 .map_err(|e| format!("Failed to convert update: {}", e))
         })?;
-
-    // If the update doesn't contain any update operators ($set, etc.), wrap it in $set
     let final_update = if update_doc.keys().any(|k| k.starts_with('$')) {
         update_doc
     } else {

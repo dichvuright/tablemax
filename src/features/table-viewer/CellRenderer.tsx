@@ -1,33 +1,21 @@
 import { cn } from '@/lib/utils';
-
 export type CellType = 'null' | 'number' | 'boolean' | 'date' | 'json' | 'objectid' | 'text';
-
-/**
- * Detect the type of a cell value for styling
- */
 export function detectCellType(value: unknown): CellType {
   if (value === null || value === undefined) return 'null';
   if (typeof value === 'number') return 'number';
   if (typeof value === 'boolean') return 'boolean';
   if (typeof value === 'object') {
-    // MongoDB ObjectId: { "$oid": "..." }
     const obj = value as Record<string, unknown>;
     if ('$oid' in obj && typeof obj['$oid'] === 'string') return 'objectid';
-    // MongoDB date: { "$date": "..." }
     if ('$date' in obj) return 'date';
     return 'json';
   }
   if (typeof value === 'string') {
     if (/^\d{4}-\d{2}-\d{2}/.test(value)) return 'date';
-    // ObjectId hex string (24 hex chars)
     if (/^[a-f0-9]{24}$/i.test(value)) return 'objectid';
   }
   return 'text';
 }
-
-/**
- * Format a cell value for display
- */
 export function formatCellValue(value: unknown, type: CellType): string {
   switch (type) {
     case 'null':
@@ -66,10 +54,6 @@ interface CellRendererProps {
   value: unknown;
   className?: string;
 }
-
-/**
- * Smart cell renderer with type-based styling
- */
 export function CellRenderer({ value, className }: CellRendererProps) {
   const type = detectCellType(value);
   const displayValue = formatCellValue(value, type);
@@ -95,10 +79,6 @@ export function CellRenderer({ value, className }: CellRendererProps) {
     </span>
   );
 }
-
-/**
- * Copy value to clipboard
- */
 export async function copyCellValue(value: unknown): Promise<void> {
   const type = detectCellType(value);
   const text = type === 'json'

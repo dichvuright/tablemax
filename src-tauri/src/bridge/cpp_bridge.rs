@@ -1,17 +1,6 @@
 #![allow(non_camel_case_types, dead_code, unused_imports)]
-
-/**
- * Rust FFI bindings to the TableMax C++ engine.
- * 
- * This module provides safe Rust wrappers around the C API defined in engine.h.
- * The C++ engine is loaded as a shared library (tablemax_engine.dll/.so).
- */
-
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_int, c_longlong, c_void};
-
-// ─── Raw FFI bindings ───────────────────────────────────────
-
 type EngineHandle = *mut c_void;
 type ConnectionHandle = *mut c_void;
 type ResultHandle = *mut c_void;
@@ -73,10 +62,6 @@ extern "C" {
         table_name: *const c_char,
     ) -> *const c_char;
 }
-
-// ─── Safe Rust wrappers ─────────────────────────────────────
-
-/// Helper to convert a C string from the engine to a Rust String and free it
 #[cfg(feature = "cpp-engine")]
 unsafe fn engine_string_to_rust(ptr: *const c_char) -> String {
     if ptr.is_null() {
@@ -86,8 +71,6 @@ unsafe fn engine_string_to_rust(ptr: *const c_char) -> String {
     engine_free_string(ptr);
     s
 }
-
-/// Safe wrapper around the C++ engine
 #[cfg(feature = "cpp-engine")]
 pub struct Engine {
     handle: EngineHandle,
@@ -126,17 +109,12 @@ impl Engine {
         unsafe { engine_string_to_rust(engine_get_error(self.handle)) }
     }
 }
-
 #[cfg(feature = "cpp-engine")]
 impl Drop for Engine {
     fn drop(&mut self) {
         unsafe { engine_shutdown(self.handle) }
     }
 }
-
-// ─── Tauri commands (engine-backed) ─────────────────────────
-
-/// Get the C++ engine version.
 #[tauri::command]
 pub fn engine_version() -> String {
     #[cfg(feature = "cpp-engine")]

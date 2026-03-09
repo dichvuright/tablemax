@@ -13,8 +13,6 @@ export interface QueryTab {
 interface TabState {
   tabs: QueryTab[];
   activeTabId: string | null;
-
-  // Actions
   addTab: () => void;
   removeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
@@ -56,7 +54,7 @@ export const useTabStore = create<TabState>((set, get) => {
 
     removeTab: (id) => {
       const { tabs, activeTabId } = get();
-      if (tabs.length <= 1) return; // Keep at least one tab
+      if (tabs.length <= 1) return;
 
       const newTabs = tabs.filter(t => t.id !== id);
       let newActiveId = activeTabId;

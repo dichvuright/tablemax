@@ -57,12 +57,8 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [showColumnPicker, setShowColumnPicker] = useState(false);
-
-  // Build column definitions from result
   const columns = useMemo<ColumnDef<DataRow>[]>(() => {
     if (!result?.columns.length) return [];
-
-    // Row number column
     const rowNumCol: ColumnDef<DataRow> = {
       id: '__row_num',
       header: '#',
@@ -140,8 +136,6 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
     await navigator.clipboard.writeText([header, ...rows].join('\n'));
     toast.success(`Copied ${result.rows.length} rows to clipboard`);
   }, [result]);
-
-  // Loading state
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -152,8 +146,6 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
       </div>
     );
   }
-
-  // Error state
   if (error) {
     return (
       <div className="flex-1 flex items-center justify-center p-4">
@@ -167,8 +159,6 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
       </div>
     );
   }
-
-  // Empty state
   if (!result) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -186,37 +176,26 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Toolbar */}
       <div className="h-8 px-3 flex items-center gap-2 bg-muted/20 border-b border-border shrink-0">
-        {/* Row count */}
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Rows3 className="h-3 w-3" />
           <span>{data.length.toLocaleString()} rows</span>
         </div>
-
-        {/* Columns count */}
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Columns3 className="h-3 w-3" />
           <span>{result.columns.length} cols</span>
         </div>
-
-        {/* Affected rows */}
         {result.affected_rows > 0 && (
           <Badge variant="outline" className="text-[10px] h-5">
             {result.affected_rows} affected
           </Badge>
         )}
-
-        {/* Selected rows */}
         {Object.keys(rowSelection).length > 0 && (
           <Badge variant="secondary" className="text-[10px] h-5">
             {Object.keys(rowSelection).length} selected
           </Badge>
         )}
-
         <div className="flex-1" />
-
-        {/* Column visibility toggle */}
         <Tooltip>
           <TooltipTrigger
             className="h-5 w-5 p-0 inline-flex items-center justify-center rounded-md hover:bg-muted transition-colors"
@@ -232,8 +211,6 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
             Toggle columns
           </TooltipContent>
         </Tooltip>
-
-        {/* Copy all */}
         <Tooltip>
           <TooltipTrigger
             className="h-5 w-5 p-0 inline-flex items-center justify-center rounded-md hover:bg-muted transition-colors"
@@ -245,15 +222,11 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
             Copy all rows (TSV)
           </TooltipContent>
         </Tooltip>
-
-        {/* Execution time */}
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
           <Timer className="h-3 w-3" />
           {result.execution_time_ms}ms
         </div>
       </div>
-
-      {/* Column Picker */}
       {showColumnPicker && (
         <div className="px-3 py-2 border-b border-border bg-muted/10 flex flex-wrap gap-1.5 shrink-0">
           {result.columns.map(col => {
@@ -276,8 +249,6 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
           })}
         </div>
       )}
-
-      {/* If no columns (write query), show affected message */}
       {result.columns.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-sm text-muted-foreground">
@@ -285,13 +256,11 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
           </div>
         </div>
       ) : (
-        /* Virtualized Table */
         <div
           ref={parentRef}
           className="flex-1 overflow-auto"
         >
           <div style={{ minWidth: totalWidth }}>
-            {/* Header */}
             <div className="sticky top-0 z-10 bg-muted/70 backdrop-blur-sm border-b border-border">
               {table.getHeaderGroups().map((headerGroup: HeaderGroup<DataRow>) => (
                 <div key={headerGroup.id} className="flex">
@@ -323,8 +292,6 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
                           )}
                         </button>
                       )}
-
-                      {/* Column resize handle */}
                       {header.column.getCanResize() && (
                         <div
                           onMouseDown={header.getResizeHandler()}
@@ -341,8 +308,6 @@ export function VirtualDataGrid({ result, error, isLoading }: VirtualDataGridPro
                 </div>
               ))}
             </div>
-
-            {/* Virtualized rows */}
             <div
               style={{
                 height: `${virtualizer.getTotalSize()}px`,

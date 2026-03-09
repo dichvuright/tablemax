@@ -1,5 +1,3 @@
-/// Build a connection string from the connection parameters.
-/// This is used by the frontend to pass to the tauri-plugin-sql JS API.
 #[tauri::command]
 pub fn build_connection_string(
     db_type: String,
@@ -12,7 +10,6 @@ pub fn build_connection_string(
     uri: Option<String>,
     auth_source: Option<String>,
 ) -> Result<String, String> {
-    // If URI mode, return raw URI
     if connection_method.as_deref() == Some("uri") {
         return uri.ok_or_else(|| "URI is required in URI mode".to_string());
     }
@@ -54,8 +51,6 @@ pub fn build_connection_string(
         _ => Err(format!("Unsupported database type: {}", db_type)),
     }
 }
-
-/// Get the appropriate SQL query to list tables for a given database type
 #[tauri::command]
 pub fn get_list_tables_query(db_type: String) -> Result<String, String> {
     match db_type.as_str() {
