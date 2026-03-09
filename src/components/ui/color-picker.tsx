@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { HexColorPicker } from 'react-colorful';
 import { cn } from '@/lib/utils';
-import { Palette, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 const COLOR_PRESETS = [
   '#fecaca', '#fca5a5', '#f87171', '#ef4444', '#dc2626', '#b91c1c',

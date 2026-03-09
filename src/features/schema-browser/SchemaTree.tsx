@@ -33,6 +33,13 @@ export function SchemaTree() {
 
       if (activeConnection.type === 'mongodb') {
         // MongoDB: use dedicated list collections command
+        if (!activeConnection.database?.trim()) {
+          toast.error('MongoDB requires a database name', {
+            description: 'Edit your connection and enter a database name (e.g. "admin" or "test")',
+          });
+          setIsLoading(false);
+          return;
+        }
         tableNames = await api.mongoListCollections(activeConnection);
       } else {
         // SQL databases: use tauri-plugin-sql

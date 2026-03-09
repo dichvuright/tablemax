@@ -41,7 +41,6 @@ function createTab(): QueryTab {
 
 export const useTabStore = create<TabState>((set, get) => {
   const initialTab = createTab();
-  initialTab.query = 'SELECT 1;';
 
   return {
     tabs: [initialTab],
