@@ -1,13 +1,3 @@
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct QueryResult {
-    pub columns: Vec<String>,
-    pub rows: Vec<serde_json::Value>,
-    pub affected_rows: u64,
-    pub execution_time_ms: u64,
-}
-
 /// Build a connection string from the connection parameters.
 /// This is used by the frontend to pass to the tauri-plugin-sql JS API.
 #[tauri::command]
