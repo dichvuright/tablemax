@@ -126,6 +126,14 @@ export async function closeDbConnection(connectionId: string): Promise<void> {
 
 // ─── MongoDB-specific functions ─────────────────────────────────
 
+export async function mongoListDatabases(connection: DatabaseConnection): Promise<string[]> {
+  const connString = getEffectiveConnectionString(connection);
+  return safeInvoke<string[]>('mongo_list_databases', {
+    connectionId: connection.id,
+    connString,
+  });
+}
+
 export async function mongoListCollections(connection: DatabaseConnection): Promise<string[]> {
   const connString = getEffectiveConnectionString(connection);
   return safeInvoke<string[]>('mongo_list_collections', {

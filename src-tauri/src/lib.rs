@@ -21,6 +21,7 @@ pub fn run() {
             query::build_connection_string,
             query::get_list_tables_query,
             mongo_cmd::mongo_test_connection,
+            mongo_cmd::mongo_list_databases,
             mongo_cmd::mongo_list_collections,
             mongo_cmd::mongo_find,
             mongo_cmd::mongo_aggregate,

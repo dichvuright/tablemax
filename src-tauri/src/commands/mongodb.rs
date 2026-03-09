@@ -58,6 +58,22 @@ pub async fn mongo_test_connection(conn_string: String) -> Result<super::connect
 }
 
 #[tauri::command]
+pub async fn mongo_list_databases(
+    pool: State<'_, MongoPool>,
+    connection_id: String,
+    conn_string: String,
+) -> Result<Vec<String>, String> {
+    let client = get_client(&pool, &connection_id, &conn_string).await?;
+
+    let names = client
+        .list_database_names()
+        .await
+        .map_err(|e| format!("Failed to list databases: {}", e))?;
+
+    Ok(names)
+}
+
+#[tauri::command]
 pub async fn mongo_list_collections(
     pool: State<'_, MongoPool>,
     connection_id: String,
