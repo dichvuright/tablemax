@@ -42,25 +42,14 @@ export function SchemaTree() {
     setIsLoading(true);
     try {
       if (isMongo) {
-        if (activeConnection.database?.trim()) {
-          // Specific database — list its collections directly
-          const collections = await api.mongoListCollections(activeConnection);
-          setMongoDbs([{
-            name: activeConnection.database,
-            isExpanded: true,
-            collections,
-            isLoading: false,
-          }]);
-        } else {
-          // No database specified → list all databases
-          const dbNames = await api.mongoListDatabases(activeConnection);
-          setMongoDbs(dbNames.map(name => ({
-            name,
-            isExpanded: false,
-            collections: [],
-            isLoading: false,
-          })));
-        }
+        // Always list all databases (like Compass)
+        const dbNames = await api.mongoListDatabases(activeConnection);
+        setMongoDbs(dbNames.sort((a, b) => a.localeCompare(b)).map(name => ({
+          name,
+          isExpanded: false,
+          collections: [],
+          isLoading: false,
+        })));
       } else {
         // SQL databases
         const db = await api.getDbConnection(activeConnection);
@@ -126,7 +115,7 @@ export function SchemaTree() {
       try {
         const collections = await api.mongoListCollections(updatedConn);
         setMongoDbs(prev => prev.map((d, i) =>
-          i === index ? { ...d, collections, isLoading: false } : d
+          i === index ? { ...d, collections: collections.sort((a, b) => a.localeCompare(b)), isLoading: false } : d
         ));
       } catch (err) {
         toast.error(`Failed to list collections for ${db.name}`, {
@@ -219,7 +208,7 @@ export function SchemaTree() {
         {isMongo && mongoDbs.map((db, dbIndex) => (
           <div key={db.name}>
             <button
-              className={`w-full flex items-center gap-1.5 px-2 py-1 rounded-md text-left transition-colors ${
+              className={`w-full flex items-center gap-1.5 px-2 py-1.5 rounded-md text-left transition-colors ${
                 db.isExpanded
                   ? 'bg-accent/40 text-accent-foreground'
                   : 'hover:bg-muted/30'
@@ -231,8 +220,8 @@ export function SchemaTree() {
               ) : (
                 <ChevronRight className="h-3 w-3 text-muted-foreground/50 shrink-0" />
               )}
-              <DbIcon className="h-3 w-3 text-muted-foreground/50 shrink-0" />
-              <span className="text-[11px] truncate">{db.name}</span>
+              <DbIcon className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
+              <span className="text-[14px] truncate">{db.name}</span>
               {db.isLoading && <Loader2 className="h-3 w-3 animate-spin ml-auto text-muted-foreground/40" />}
             </button>
 
@@ -244,7 +233,7 @@ export function SchemaTree() {
                 {db.collections.map(coll => (
                   <button
                     key={coll}
-                    className={`w-full flex items-center gap-1.5 px-2 py-0.5 rounded-md text-left transition-colors ${
+                    className={`w-full flex items-center gap-1.5 px-2 py-1 rounded-md text-left transition-colors ${
                       selectedCollection === coll
                         ? 'bg-primary/15 text-primary'
                         : 'hover:bg-muted/30'
@@ -252,10 +241,10 @@ export function SchemaTree() {
                     onClick={() => handleMongoCollectionClick(db.name, coll)}
                     title={`Click to view: db.${coll}.find({})`}
                   >
-                    <Table2 className={`h-3 w-3 shrink-0 ${
+                    <Table2 className={`h-3.5 w-3.5 shrink-0 ${
                       selectedCollection === coll ? 'text-primary/60' : 'text-muted-foreground/40'
                     }`} />
-                    <span className="text-[11px] truncate">{coll}</span>
+                    <span className="text-[14px] truncate">{coll}</span>
                   </button>
                 ))}
               </div>

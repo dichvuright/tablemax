@@ -175,6 +175,66 @@ export async function mongoAggregate(
   });
 }
 
+export async function mongoInsertOne(
+  connection: DatabaseConnection,
+  collection: string,
+  document: string,
+): Promise<string> {
+  const connString = getEffectiveConnectionString(connection);
+  return safeInvoke<string>('mongo_insert_one', {
+    connectionId: connection.id,
+    connString,
+    database: connection.database,
+    collection,
+    document,
+  });
+}
+
+export async function mongoUpdateOne(
+  connection: DatabaseConnection,
+  collection: string,
+  filter: string,
+  update: string,
+): Promise<number> {
+  const connString = getEffectiveConnectionString(connection);
+  return safeInvoke<number>('mongo_update_one', {
+    connectionId: connection.id,
+    connString,
+    database: connection.database,
+    collection,
+    filter,
+    update,
+  });
+}
+
+export async function mongoDeleteOne(
+  connection: DatabaseConnection,
+  collection: string,
+  filter: string,
+): Promise<number> {
+  const connString = getEffectiveConnectionString(connection);
+  return safeInvoke<number>('mongo_delete_one', {
+    connectionId: connection.id,
+    connString,
+    database: connection.database,
+    collection,
+    filter,
+  });
+}
+
+export async function mongoCount(
+  connection: DatabaseConnection,
+  collection: string,
+): Promise<number> {
+  const connString = getEffectiveConnectionString(connection);
+  return safeInvoke<number>('mongo_count', {
+    connectionId: connection.id,
+    connString,
+    database: connection.database,
+    collection,
+  });
+}
+
 // ─── Unified query execution ─────────────────────────────────
 
 export async function executeQuery(

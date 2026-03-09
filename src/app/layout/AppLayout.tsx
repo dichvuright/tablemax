@@ -4,6 +4,7 @@ import { ConnectionForm } from '@/features/connection/ConnectionForm';
 import { QueryEditor } from '@/features/query-editor/QueryEditor';
 import { QueryTabs } from '@/features/query-editor/QueryTabs';
 import { VirtualDataGrid } from '@/features/table-viewer/VirtualDataGrid';
+import { MongoDocumentView } from '@/features/table-viewer/MongoDocumentView';
 import { useConnectionStore } from '@/features/connection/connectionStore';
 import { useTabStore } from '@/features/query-editor/tabStore';
 import { Toaster } from '@/components/ui/sonner';
@@ -80,11 +81,19 @@ export function AppLayout() {
             <div className="flex-1 flex flex-col overflow-hidden">
               <QueryTabs />
               <QueryEditor />
-              <VirtualDataGrid
-                result={activeTab?.result ?? null}
-                error={activeTab?.error ?? null}
-                isLoading={activeTab?.isExecuting ?? false}
-              />
+              {activeConnection?.type === 'mongodb' ? (
+                <MongoDocumentView
+                  result={activeTab?.result ?? null}
+                  error={activeTab?.error ?? null}
+                  isLoading={activeTab?.isExecuting ?? false}
+                />
+              ) : (
+                <VirtualDataGrid
+                  result={activeTab?.result ?? null}
+                  error={activeTab?.error ?? null}
+                  isLoading={activeTab?.isExecuting ?? false}
+                />
+              )}
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center">

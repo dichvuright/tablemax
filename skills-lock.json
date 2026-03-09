@@ -10,6 +10,11 @@
       "source": "vercel-labs/skills",
       "sourceType": "github",
       "computedHash": "25872a21881a950edc3db1f3329664d60405d539660ce05b3265db2de06a7dfd"
+    },
+    "rust-skills": {
+      "source": "leonardomso/rust-skills",
+      "sourceType": "github",
+      "computedHash": "d099b313fcb795ef568b0856d34a8bcfc16864b8ae5bb3729f038c97893e0132"
     }
   }
 }

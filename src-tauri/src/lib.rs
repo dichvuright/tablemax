@@ -25,6 +25,10 @@ pub fn run() {
             mongo_cmd::mongo_list_collections,
             mongo_cmd::mongo_find,
             mongo_cmd::mongo_aggregate,
+            mongo_cmd::mongo_insert_one,
+            mongo_cmd::mongo_update_one,
+            mongo_cmd::mongo_delete_one,
+            mongo_cmd::mongo_count,
             mongo_cmd::mongo_disconnect,
             bridge::cpp_bridge::engine_version,
         ])

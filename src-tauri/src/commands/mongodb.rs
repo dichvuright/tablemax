@@ -221,6 +221,124 @@ pub async fn mongo_aggregate(
 }
 
 #[tauri::command]
+pub async fn mongo_insert_one(
+    pool: State<'_, MongoPool>,
+    connection_id: String,
+    conn_string: String,
+    database: String,
+    collection: String,
+    document: String,
+) -> Result<String, String> {
+    let client = get_client(&pool, &connection_id, &conn_string).await?;
+    let db = client.database(&database);
+    let coll = db.collection::<Document>(&collection);
+
+    let doc: Document = serde_json::from_str::<Value>(&document)
+        .map_err(|e| format!("Invalid JSON: {}", e))
+        .and_then(|v| {
+            mongodb::bson::to_document(&v)
+                .map_err(|e| format!("Failed to convert to BSON: {}", e))
+        })?;
+
+    let result = coll.insert_one(doc)
+        .await
+        .map_err(|e| format!("Insert failed: {}", e))?;
+
+    let id = serde_json::to_string(&result.inserted_id)
+        .unwrap_or_else(|_| "unknown".to_string());
+
+    Ok(id)
+}
+
+#[tauri::command]
+pub async fn mongo_update_one(
+    pool: State<'_, MongoPool>,
+    connection_id: String,
+    conn_string: String,
+    database: String,
+    collection: String,
+    filter: String,
+    update: String,
+) -> Result<u64, String> {
+    let client = get_client(&pool, &connection_id, &conn_string).await?;
+    let db = client.database(&database);
+    let coll = db.collection::<Document>(&collection);
+
+    let filter_doc: Document = serde_json::from_str::<Value>(&filter)
+        .map_err(|e| format!("Invalid filter JSON: {}", e))
+        .and_then(|v| {
+            mongodb::bson::to_document(&v)
+                .map_err(|e| format!("Failed to convert filter: {}", e))
+        })?;
+
+    let update_doc: Document = serde_json::from_str::<Value>(&update)
+        .map_err(|e| format!("Invalid update JSON: {}", e))
+        .and_then(|v| {
+            mongodb::bson::to_document(&v)
+                .map_err(|e| format!("Failed to convert update: {}", e))
+        })?;
+
+    // If the update doesn't contain any update operators ($set, etc.), wrap it in $set
+    let final_update = if update_doc.keys().any(|k| k.starts_with('$')) {
+        update_doc
+    } else {
+        mongodb::bson::doc! { "$set": update_doc }
+    };
+
+    let result = coll.update_one(filter_doc, final_update)
+        .await
+        .map_err(|e| format!("Update failed: {}", e))?;
+
+    Ok(result.modified_count)
+}
+
+#[tauri::command]
+pub async fn mongo_delete_one(
+    pool: State<'_, MongoPool>,
+    connection_id: String,
+    conn_string: String,
+    database: String,
+    collection: String,
+    filter: String,
+) -> Result<u64, String> {
+    let client = get_client(&pool, &connection_id, &conn_string).await?;
+    let db = client.database(&database);
+    let coll = db.collection::<Document>(&collection);
+
+    let filter_doc: Document = serde_json::from_str::<Value>(&filter)
+        .map_err(|e| format!("Invalid filter JSON: {}", e))
+        .and_then(|v| {
+            mongodb::bson::to_document(&v)
+                .map_err(|e| format!("Failed to convert filter: {}", e))
+        })?;
+
+    let result = coll.delete_one(filter_doc)
+        .await
+        .map_err(|e| format!("Delete failed: {}", e))?;
+
+    Ok(result.deleted_count)
+}
+
+#[tauri::command]
+pub async fn mongo_count(
+    pool: State<'_, MongoPool>,
+    connection_id: String,
+    conn_string: String,
+    database: String,
+    collection: String,
+) -> Result<u64, String> {
+    let client = get_client(&pool, &connection_id, &conn_string).await?;
+    let db = client.database(&database);
+    let coll = db.collection::<Document>(&collection);
+
+    let count = coll.estimated_document_count()
+        .await
+        .map_err(|e| format!("Count failed: {}", e))?;
+
+    Ok(count)
+}
+
+#[tauri::command]
 pub async fn mongo_disconnect(
     pool: State<'_, MongoPool>,
     connection_id: String,
