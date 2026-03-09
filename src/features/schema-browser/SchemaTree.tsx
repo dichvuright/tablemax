@@ -29,14 +29,21 @@ export function SchemaTree() {
 
     setIsLoading(true);
     try {
-      const db = await api.getDbConnection(activeConnection);
-      const query = await api.getListTablesQuery(activeConnection.type);
-      const rows = await db.select<Record<string, unknown>[]>(query);
+      let tableNames: string[];
 
-      const tableNames = rows.map(row => {
-        const firstValue = Object.values(row)[0];
-        return String(firstValue ?? '');
-      }).filter(Boolean);
+      if (activeConnection.type === 'mongodb') {
+        // MongoDB: use dedicated list collections command
+        tableNames = await api.mongoListCollections(activeConnection);
+      } else {
+        // SQL databases: use tauri-plugin-sql
+        const db = await api.getDbConnection(activeConnection);
+        const query = await api.getListTablesQuery(activeConnection.type);
+        const rows = await db.select<Record<string, unknown>[]>(query);
+        tableNames = rows.map(row => {
+          const firstValue = Object.values(row)[0];
+          return String(firstValue ?? '');
+        }).filter(Boolean);
+      }
 
       setTables(tableNames.map(name => ({ name, isExpanded: false })));
     } catch (err) {
@@ -66,9 +73,13 @@ export function SchemaTree() {
   };
 
   const handleTableClick = (tableName: string) => {
-    // Insert select query into the query editor
-    const query = `SELECT * FROM ${tableName} LIMIT 100;`;
-    useConnectionStore.getState().executeQuery(query);
+    if (activeConnection?.type === 'mongodb') {
+      const query = `db.${tableName}.find({})`;
+      useConnectionStore.getState().executeQuery(query);
+    } else {
+      const query = `SELECT * FROM ${tableName} LIMIT 100;`;
+      useConnectionStore.getState().executeQuery(query);
+    }
   };
 
   if (!activeConnectionId) return null;
@@ -78,7 +89,7 @@ export function SchemaTree() {
       {/* Header */}
       <div className="px-4 py-2 flex items-center justify-between">
         <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-          Tables
+          {activeConnection?.type === 'mongodb' ? 'Collections' : 'Tables'}
         </span>
         <Button
           variant="ghost"

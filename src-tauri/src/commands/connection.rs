@@ -37,6 +37,13 @@ impl DatabaseConnection {
                 self.username, self.password, self.host, self.port, self.database
             ),
             "sqlite" => format!("sqlite:{}", self.database),
+            "mongodb" => {
+                if self.username.is_empty() {
+                    format!("mongodb://{}:{}/{}", self.host, self.port, self.database)
+                } else {
+                    format!("mongodb://{}:{}@{}:{}/{}", self.username, self.password, self.host, self.port, self.database)
+                }
+            }
             _ => String::new(),
         }
     }
@@ -58,8 +65,8 @@ pub async fn test_connection(connection: DatabaseConnection) -> Result<Connectio
                 latency_ms: Some(elapsed),
             })
         }
-        "mysql" | "postgres" => {
-            // For MySQL/PostgreSQL, try to parse the connection string
+        "mysql" | "postgres" | "mongodb" => {
+            // For MySQL/PostgreSQL/MongoDB, try to parse the connection string
             if conn_string.is_empty() {
                 return Ok(ConnectionTestResult {
                     success: false,
