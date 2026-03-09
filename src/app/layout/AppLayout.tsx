@@ -100,7 +100,7 @@ export function AppLayout() {
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-foreground/80">
-                    Welcome to DB Studio
+                    Welcome to TableMax
                   </h2>
                   <p className="text-sm text-muted-foreground mt-1">
                     Create a connection to get started

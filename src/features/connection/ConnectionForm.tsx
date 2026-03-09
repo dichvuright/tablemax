@@ -31,6 +31,7 @@ import {
   XCircle,
   Zap,
 } from 'lucide-react';
+import { ColorPicker } from '@/components/ui/color-picker';
 
 const DEFAULT_COLORS = [
   '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e',
@@ -148,19 +149,19 @@ export function ConnectionForm() {
           {/* Connection Name */}
           <div className="space-y-2">
             <Label htmlFor="conn-name">Connection Name</Label>
-            <div className="flex gap-2">
-              <Input
-                id="conn-name"
-                placeholder="My Database"
-                value={form.name || ''}
-                onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
-                className="flex-1"
-              />
-              <input
-                type="color"
+            <div className="flex gap-3 items-end">
+              <div className="flex-1">
+                <Input
+                  id="conn-name"
+                  placeholder="My Database"
+                  value={form.name || ''}
+                  onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <ColorPicker
                 value={form.color || '#6366f1'}
-                onChange={e => setForm(prev => ({ ...prev, color: e.target.value }))}
-                className="w-10 h-9 rounded-md border border-input cursor-pointer"
+                onChange={(color) => setForm(prev => ({ ...prev, color }))}
+                label=""
               />
             </div>
           </div>
