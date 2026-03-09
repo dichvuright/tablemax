@@ -9,12 +9,20 @@ pub struct DatabaseConnection {
     pub name: String,
     #[serde(rename = "type")]
     pub db_type: String,
+    #[serde(rename = "connectionMethod")]
+    pub connection_method: String,
     pub host: String,
     pub port: u16,
     pub username: String,
     pub password: String,
     pub database: String,
+    #[serde(default)]
+    pub uri: Option<String>,
     pub color: String,
+    #[serde(default)]
+    pub ssl: Option<bool>,
+    #[serde(default, rename = "authSource")]
+    pub auth_source: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,6 +35,11 @@ pub struct ConnectionTestResult {
 impl DatabaseConnection {
     /// Build a connection string based on database type
     pub fn connection_string(&self) -> String {
+        // If connection method is URI, return the raw URI
+        if self.connection_method == "uri" {
+            return self.uri.clone().unwrap_or_default();
+        }
+
         match self.db_type.as_str() {
             "mysql" => format!(
                 "mysql://{}:{}@{}:{}/{}",
@@ -38,10 +51,29 @@ impl DatabaseConnection {
             ),
             "sqlite" => format!("sqlite:{}", self.database),
             "mongodb" => {
-                if self.username.is_empty() {
-                    format!("mongodb://{}:{}/{}", self.host, self.port, self.database)
+                let auth_source = self.auth_source.as_deref().unwrap_or("");
+                let auth_param = if !auth_source.is_empty() {
+                    format!("?authSource={}", auth_source)
                 } else {
-                    format!("mongodb://{}:{}@{}:{}/{}", self.username, self.password, self.host, self.port, self.database)
+                    String::new()
+                };
+
+                if self.username.is_empty() {
+                    format!("mongodb://{}:{}/{}{}", self.host, self.port, self.database, auth_param)
+                } else {
+                    format!(
+                        "mongodb://{}:{}@{}:{}/{}{}",
+                        self.username, self.password, self.host, self.port, self.database, auth_param
+                    )
+                }
+            }
+            "redis" => {
+                if self.username.is_empty() && self.password.is_empty() {
+                    format!("redis://{}:{}", self.host, self.port)
+                } else if self.username.is_empty() {
+                    format!("redis://:{}@{}:{}", self.password, self.host, self.port)
+                } else {
+                    format!("redis://{}:{}@{}:{}", self.username, self.password, self.host, self.port)
                 }
             }
             _ => String::new(),
@@ -54,10 +86,8 @@ pub async fn test_connection(connection: DatabaseConnection) -> Result<Connectio
     let conn_string = connection.connection_string();
     let start = Instant::now();
 
-    // Use the tauri-plugin-sql approach: try to load the database
     match connection.db_type.as_str() {
         "sqlite" => {
-            // For SQLite, we just check if the path is valid
             let elapsed = start.elapsed().as_millis() as u64;
             Ok(ConnectionTestResult {
                 success: true,
@@ -65,8 +95,7 @@ pub async fn test_connection(connection: DatabaseConnection) -> Result<Connectio
                 latency_ms: Some(elapsed),
             })
         }
-        "mysql" | "postgres" | "mongodb" => {
-            // For MySQL/PostgreSQL/MongoDB, try to parse the connection string
+        "mysql" | "postgres" | "mongodb" | "redis" => {
             if conn_string.is_empty() {
                 return Ok(ConnectionTestResult {
                     success: false,
@@ -92,8 +121,6 @@ pub async fn test_connection(connection: DatabaseConnection) -> Result<Connectio
 
 #[tauri::command]
 pub async fn connect_db(connection_id: String) -> Result<(), String> {
-    // For now, connection is handled by the SQL plugin on the frontend side
-    // This command validates the connection ID exists
     if connection_id.is_empty() {
         return Err("Connection ID is required".to_string());
     }
