@@ -28,10 +28,6 @@ const COLOR_PRESETS = [
   '#fbcfe8', '#f9a8d4', '#f472b6', '#ec4899', '#db2777', '#be185d',
   '#ffffff', '#cbd5e1', '#64748b', '#475569', '#0f172a', '#000000',
 ];
-
-/**
- * Check if a hex color is dark (for choosing text contrast)
- */
 function isHexDark(hex: string): boolean {
   const color = hex.replace('#', '');
   const r = parseInt(color.substring(0, 2), 16);
@@ -50,22 +46,18 @@ interface ColorPickerProps {
 
 export function ColorPicker({ value, onChange, label = 'Color', className }: ColorPickerProps) {
   const [inputValue, setInputValue] = useState(value);
-
-  // Sync input when value changes externally
   useEffect(() => {
     setInputValue(value);
   }, [value]);
 
   const handleInputChange = (v: string) => {
     setInputValue(v);
-    // Only fire onChange for valid hex colors
     if (/^#[0-9a-fA-F]{6}$/.test(v)) {
       onChange(v);
     }
   };
 
   const handleInputBlur = () => {
-    // Reset to current value if invalid
     if (!/^#[0-9a-fA-F]{6}$/.test(inputValue)) {
       setInputValue(value);
     }
@@ -80,21 +72,21 @@ export function ColorPicker({ value, onChange, label = 'Color', className }: Col
       )}
       <Popover>
         <PopoverTrigger
-          className="border-foreground/10 grid size-[46px] place-content-center rounded-xl border outline-2 outline-offset-2 outline-transparent duration-200 hover:outline-primary cursor-pointer"
+          className="border-foreground/10 grid size-9 place-content-center rounded-md border outline-2 outline-offset-2 outline-transparent duration-200 hover:outline-primary cursor-pointer"
           style={{ backgroundColor: value }}
         >
           <Palette
             className={cn('size-4', isHexDark(value) ? 'text-white/80' : 'text-black/60')}
           />
         </PopoverTrigger>
-        <PopoverContent className="w-[228px] p-3">
-          <Tabs defaultValue="presets" className="w-full">
-            <TabsList className="mb-3 grid grid-cols-2 w-full">
+        <PopoverContent className="w-[228px] gap-0! p-3">
+          <Tabs defaultValue="presets" className="w-full block!">
+            <TabsList className="mb-2 grid grid-cols-2 w-full">
               <TabsTrigger value="presets">Presets</TabsTrigger>
               <TabsTrigger value="picker">Custom</TabsTrigger>
             </TabsList>
-            <TabsContent value="presets" className="space-y-2">
-              <div className="flex max-h-44 flex-wrap gap-1 overflow-y-auto">
+            <TabsContent value="presets" className="flex-none [&[hidden]]:hidden">
+              <div className="flex max-h-44 flex-wrap gap-1 overflow-y-auto justify-center">
                 {COLOR_PRESETS.map((preset, idx) => (
                   <button
                     key={idx}
@@ -122,13 +114,14 @@ export function ColorPicker({ value, onChange, label = 'Color', className }: Col
                 ))}
               </div>
             </TabsContent>
-            <TabsContent value="picker" className="space-y-2">
+            <TabsContent value="picker" className="flex-none [&[hidden]]:hidden">
               <HexColorPicker
                 color={value}
                 onChange={onChange}
+                style={{ width: '100%' }}
               />
             </TabsContent>
-            <div className="relative mt-2">
+            <div className="relative mt-1.5">
               <div className="absolute top-1/2 left-3 -translate-y-1/2 text-xs text-muted-foreground">
                 HEX
               </div>
